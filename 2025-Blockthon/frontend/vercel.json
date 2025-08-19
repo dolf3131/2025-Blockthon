@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://fullnode.testnet.sui.io https://explorer-api.testnet.sui.io; object-src 'none'; font-src 'self';"
+          "value": "default-src 'self'; script-src 'self' https://infird.com 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://fullnode.testnet.sui.io https://explorer-api.testnet.sui.io; object-src 'none'; font-src 'self';"
         }
       ]
     }
