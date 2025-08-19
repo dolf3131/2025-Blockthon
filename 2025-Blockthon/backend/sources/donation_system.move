@@ -29,6 +29,15 @@ module donation_system::donation {
         active: bool
     }
 
+    public struct DonationNFT has key, store {
+        id: UID,
+        campaign_id: ID,
+        donor_address: address,
+        amount_donated: u64,
+        timestamp_ms: u64,
+        campaign_name: String,
+    }
+
     // === Events ===
     public struct CampaignCreated has copy, drop {
         campaign_id: ID,
@@ -93,7 +102,7 @@ module donation_system::donation {
         donation: Coin<SUI>,
         message: String,
         clock: &Clock,
-        _ctx: &mut TxContext
+        ctx: &mut TxContext // Changed _ctx to ctx
     ) {
         assert!(campaign.active, ECampaignInactive);
         assert!(clock::timestamp_ms(clock) < campaign.deadline, ECampaignFinished);
@@ -102,6 +111,17 @@ module donation_system::donation {
         campaign.donated_amount = campaign.donated_amount + amount;
 
         balance::join(&mut campaign.vault, coin::into_balance(donation));
+
+        // Mint and transfer NFT to donor
+        let nft = DonationNFT {
+            id: object::new(ctx),
+            campaign_id: object::id(campaign),
+            donor_address: tx_context::sender(ctx),
+            amount_donated: amount,
+            timestamp_ms: clock::timestamp_ms(clock),
+            campaign_name: campaign.name,
+        };
+        transfer::public_transfer(nft, tx_context::sender(ctx));
 
         event::emit(Donated {
             campaign_id: object::id(campaign),

@@ -7,7 +7,7 @@ import CreateCampaignForm from './components/CreateCampaignForm';
 import CampaignList from './components/CampaignList';
 import CampaignDetail from './components/CampaignDetail';
 
-const PACKAGE_ID = "0xf39ba8fe27f20a597e11e4b2356a35f1a7e5d6e2d9a95d614ec268bd370d7170";
+const PACKAGE_ID = "0x7b54f003f2e4aa84a0962346bc5a47ea05bf91dd7eb4f7f4394e2ca5707abb86";
 
 function App() {
   console.log("Current PACKAGE_ID:", PACKAGE_ID);
