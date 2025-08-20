@@ -176,6 +176,22 @@ function App() {
         // Fallback alert if NFT is not found in effects for any reason
         alert('Donation successful! A commemorative NFT has been sent to your wallet.');
       }
+
+      // After successful donation, refetch the specific campaign object
+      client.getObject({
+        id: campaignId,
+        options: { showContent: true },
+      }).then(updatedCampaignObject => {
+        if (updatedCampaignObject.data) {
+          setCampaigns(prevCampaigns =>
+            prevCampaigns.map(campaign =>
+              campaign.data.objectId === campaignId
+                ? updatedCampaignObject // Replace with the updated object
+                : campaign
+            )
+          );
+        }
+      });
     });
   };
 
