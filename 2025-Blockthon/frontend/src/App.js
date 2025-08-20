@@ -60,19 +60,20 @@ function App() {
       { transaction: txb },
       {
         onSuccess: (result) => {
-          // Fetch the full transaction block response to get the effects
-          client.getTransactionBlock({
-            digest: result.digest,
-            options: {
-              showEffects: true,
-            },
-          }).then(txbResponse => {
-            if (onSuccessCallback) {
-              onSuccessCallback(txbResponse);
-            } else {
-              alert('Transaction successful!');
-            }
-          });
+          setTimeout(() => {
+            client.getTransactionBlock({
+              digest: result.digest,
+              options: {
+                showEffects: true,
+              },
+            }).then(txbResponse => {
+              if (onSuccessCallback) {
+                onSuccessCallback(txbResponse);
+              } else {
+                alert('Transaction successful!');
+              }
+            });
+          }, 2000); // Add a delay to allow the transaction to be indexed
 
           setTimeout(() => {
             refetch();
