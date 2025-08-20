@@ -8,7 +8,7 @@ import CampaignList from './components/CampaignList';
 import CampaignDetail from './components/CampaignDetail';
 import NftModal from './components/NftModal'; // Import the modal component
 
-const PACKAGE_ID = "0x1f138ed66b5c35a84b9ad14e59d9e80b6c6272f1381dee6a0ca6660f006779b7";
+const PACKAGE_ID = "0x4bb4262d7360a27ac0bc041b084eef2485765821f53332c9d5373e234f725f84";
 
 function App() {
   const account = useCurrentAccount();

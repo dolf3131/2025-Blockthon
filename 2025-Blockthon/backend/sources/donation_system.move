@@ -55,7 +55,7 @@ module donation_system::donation {
         let values = vector<String>[
             string::utf8(b"Donation NFT for "),
             string::utf8(b"A commemorative NFT for your generous donation to "),
-            string::utf8(b"https://example.com/nft_image.png"), // Placeholder image URL
+            string::utf8(b"https://picsum.photos/200/300"), // Placeholder image URL
             string::utf8(b"https://example.com/"), // Placeholder project URL
         ];
 
