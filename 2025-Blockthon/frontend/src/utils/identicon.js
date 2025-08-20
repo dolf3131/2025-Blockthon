@@ -32,11 +32,6 @@
 
       var canvas = [];
 
-      // padding
-      var artist = function(x, y, w, h, color) {
-        canvas.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')" />');
-      };
-
       var block = Math.floor(options.size / 11);
       var margin = Math.floor(block * options.margin);
 
@@ -47,13 +42,13 @@
       var draw = block * 11;
 
       canvas.push('<svg width="' + draw + '" height="' + draw + '" viewBox="0 0 ' + draw + ' ' + draw + '" xmlns="http://www.w3.org/2000/svg">');
-      artist(0, 0, draw, draw, backColor);
+      canvas.push('<rect x="' + 0 + '" y="' + 0 + '" width="' + draw + '" height="' + draw + '" fill="rgb(' + backColor[0] + ',' + backColor[1] + ',' + backColor[2] + ')" />');
 
       // the grid
       for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
           if (data[i][j]) {
-            artist(margin + i * block, margin + j * block, block, block, foreColor);
+            canvas.push('<rect x="' + (margin + i * block) + '" y="' + (margin + j * block) + '" width="' + block + '" height="' + block + '" fill="rgb(' + foreColor[0] + ',' + foreColor[1] + ',' + foreColor[2] + ')" />');
           }
         }
       }
