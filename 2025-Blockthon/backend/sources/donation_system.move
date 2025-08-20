@@ -55,7 +55,7 @@ module donation_system::donation {
         let values = vector<String>[
             string::utf8(b"Donation NFT for "),
             string::utf8(b"A commemorative NFT for your generous donation to "),
-            string::utf8(b"https://picsum.photos/200/300"), // Placeholder image URL
+            string::utf8(b"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlncmh0PSIyMDAiIGZpbGw9InJlZCIvPjwvc3ZnPg=="), // Placeholder image URL
             string::utf8(b"https://example.com/"), // Placeholder project URL
         ];
 
