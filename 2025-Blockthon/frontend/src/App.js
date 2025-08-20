@@ -60,7 +60,6 @@ function App() {
       { transaction: txb },
       {
         onSuccess: (result) => {
-          console.log('Transaction successful, digest:', result.digest);
           // Fetch the full transaction block response to get the effects
           client.getTransactionBlock({
             digest: result.digest,
@@ -68,7 +67,6 @@ function App() {
               showEffects: true,
             },
           }).then(txbResponse => {
-            console.log('Full transaction block response:', txbResponse);
             if (onSuccessCallback) {
               onSuccessCallback(txbResponse);
             } else {
@@ -148,15 +146,9 @@ function App() {
     });
 
     executeTransaction(txb, (txbResponse) => {
-      console.log("Searching for NFT in created objects:", txbResponse.effects?.created);
-      console.log("Current user address:", account.address);
-
       const createdNft = txbResponse.effects?.created?.find(e => {
-        console.log("Comparing owner:", e.owner.AddressOwner, "with account:", account.address);
-        return e.owner.AddressOwner === account.address;
+        return e.owner.AddressOwner?.trim().toLowerCase() === account.address.trim().toLowerCase();
       });
-
-      console.log("Found NFT object:", createdNft);
 
       if (createdNft) {
         client.getObject({
