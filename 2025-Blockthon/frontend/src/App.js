@@ -6,11 +6,11 @@ import './App.css';
 import CreateCampaignForm from './components/CreateCampaignForm';
 import CampaignList from './components/CampaignList';
 import CampaignDetail from './components/CampaignDetail';
+import NftModal from './components/NftModal'; // Import the modal component
 
 const PACKAGE_ID = "0x7b54f003f2e4aa84a0962346bc5a47ea05bf91dd7eb4f7f4394e2ca5707abb86";
 
 function App() {
-  console.log("Current PACKAGE_ID:", PACKAGE_ID);
   const account = useCurrentAccount();
   const client = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
@@ -23,7 +23,11 @@ function App() {
   const [donationAmounts, setDonationAmounts] = useState({});
   const [donationMessages, setDonationMessages] = useState({});
   const [campaigns, setCampaigns] = useState([]);
-  const [selectedCampaign, setSelectedCampaign] = useState(null); // New state for detail view
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+
+  // State for the NFT modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalNft, setModalNft] = useState(null);
 
   const { data: eventData, isLoading, isError, refetch } = useSuiClientQuery(
     'queryEvents',
@@ -51,14 +55,17 @@ function App() {
     });
   }, [eventData, client]);
 
-  const executeTransaction = (txb) => {
+  const executeTransaction = (txb, onSuccessCallback) => {
     signAndExecute(
       { transaction: txb },
       {
         onSuccess: (result) => {
           console.log('Transaction successful:', result);
-          alert('Transaction successful!');
-          // Add a small delay to allow the indexer to catch up before refetching events
+          if (onSuccessCallback) {
+            onSuccessCallback(result);
+          } else {
+            alert('Transaction successful!');
+          }
           setTimeout(() => {
             refetch();
           }, 2000);
@@ -102,7 +109,7 @@ function App() {
       setName("");
       setDescription("");
       setOrganizerName("");
-      setDuration(""); // Reset on success
+      setDuration("");
       setGoal("");
     } catch (error) {
       console.error("Error during transaction building in createCampaign:", error);
@@ -129,7 +136,23 @@ function App() {
           txb.object('0x6')
       ],
     });
-    executeTransaction(txb);
+
+    executeTransaction(txb, (result) => {
+      const createdNft = result.effects.created.find(e => e.owner.AddressOwner === account.address);
+      if (createdNft) {
+        client.getObject({
+          id: createdNft.reference.objectId,
+          options: { showContent: true, showDisplay: true },
+        }).then(nftDetails => {
+          if (nftDetails.data.type === `${PACKAGE_ID}::donation::DonationNFT`) {
+             setModalNft(nftDetails);
+             setIsModalOpen(true);
+          }
+        });
+      } else {
+        alert('Donation successful! NFT created.');
+      }
+    });
   };
 
   const withdraw = (campaignId) => {
@@ -146,7 +169,6 @@ function App() {
     setDonationAmounts(prev => ({ ...prev, [id]: value }));
   }
 
-  // Utility function to format SUI amounts
   const formatSui = (mistAmount) => {
     const suiAmount = mistAmount / 1_000_000_000;
     return `${suiAmount.toFixed(3)} SUI`;
@@ -198,6 +220,13 @@ function App() {
           <p>Please connect your wallet to continue.</p>
         )}
       </main>
+
+      {isModalOpen && modalNft && (
+        <NftModal
+          nft={modalNft}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
