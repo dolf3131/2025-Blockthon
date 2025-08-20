@@ -60,12 +60,18 @@ function App() {
       { transaction: txb },
       {
         onSuccess: (result) => {
-          console.log('Transaction successful:', result);
-          if (onSuccessCallback) {
-            onSuccessCallback(result);
-          } else {
-            alert('Transaction successful!');
+          console.log('Full transaction result:', result); // Added for debugging
+          try {
+            if (onSuccessCallback) {
+              onSuccessCallback(result);
+            } else {
+              alert('Transaction successful!');
+            }
+          } catch (e) {
+            console.error("Error in onSuccess callback:", e);
+            alert("Transaction succeeded, but there was an error processing the result.");
           }
+
           setTimeout(() => {
             refetch();
           }, 2000);
