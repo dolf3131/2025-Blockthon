@@ -148,8 +148,16 @@ function App() {
     });
 
     executeTransaction(txb, (txbResponse) => {
-      // Now txbResponse.effects should be a proper object
-      const createdNft = txbResponse.effects?.created?.find(e => e.owner.AddressOwner === account.address);
+      console.log("Searching for NFT in created objects:", txbResponse.effects?.created);
+      console.log("Current user address:", account.address);
+
+      const createdNft = txbResponse.effects?.created?.find(e => {
+        console.log("Comparing owner:", e.owner.AddressOwner, "with account:", account.address);
+        return e.owner.AddressOwner === account.address;
+      });
+
+      console.log("Found NFT object:", createdNft);
+
       if (createdNft) {
         client.getObject({
           id: createdNft.reference.objectId,
