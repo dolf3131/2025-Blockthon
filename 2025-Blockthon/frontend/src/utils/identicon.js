@@ -25,9 +25,8 @@
       var hash = this.hash;
       var options = this.options;
 
-      var rgba = this.buildColor();
-      var foreColor = rgba;
-      var backColor = options.background;
+      var foreColor = [0, 0, 255, 255]; // Hardcoded blue
+      var backColor = [255, 255, 255, 255]; // Hardcoded white
 
       var data = this.buildData();
 
