@@ -15,17 +15,7 @@ const NftModal = ({ nft, onClose }) => {
         <h2>Thank You for Your Donation!</h2>
         <p>You have received a commemorative NFT.</p>
         <div className="nft-card">
-          {imageUrl.startsWith('data:image/svg+xml;base64,') ? (
-            <div
-              className="nft-image"
-              dangerouslySetInnerHTML={{
-                __html: atob(imageUrl.substring(imageUrl.indexOf(',') + 1)),
-              }}
-              style={{ width: '200px', height: '200px' }} // Explicitly set size for SVG
-            />
-          ) : (
-            <img src={imageUrl} alt={name} className="nft-image" />
-          )}
+          <img src={imageUrl} alt={name} className="nft-image" />
           <h3>{name}</h3>
           <p>{description}</p>
           <p><b>Campaign:</b> {nft.data.content.fields.campaign_name}</p>
