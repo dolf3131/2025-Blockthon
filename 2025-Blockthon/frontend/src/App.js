@@ -57,21 +57,25 @@ function App() {
 
   const executeTransaction = (txb, onSuccessCallback) => {
     signAndExecute(
-      {
-        transaction: txb,
-        options: {
-          showEffects: true, // Request the effects object
-        },
-      },
+      { transaction: txb },
       {
         onSuccess: (result) => {
-          console.log('Full transaction result:', result); // Added for debugging
-          console.log('Transaction successful:', result);
-          if (onSuccessCallback) {
-            onSuccessCallback(result);
-          } else {
-            alert('Transaction successful!');
-          }
+          console.log('Transaction successful, digest:', result.digest);
+          // Fetch the full transaction block response to get the effects
+          client.getTransactionBlock({
+            digest: result.digest,
+            options: {
+              showEffects: true,
+            },
+          }).then(txbResponse => {
+            console.log('Full transaction block response:', txbResponse);
+            if (onSuccessCallback) {
+              onSuccessCallback(txbResponse);
+            } else {
+              alert('Transaction successful!');
+            }
+          });
+
           setTimeout(() => {
             refetch();
           }, 2000);
@@ -143,9 +147,9 @@ function App() {
       ],
     });
 
-    executeTransaction(txb, (result) => {
-      // Now result.effects should be a proper object
-      const createdNft = result.effects?.created?.find(e => e.owner.AddressOwner === account.address);
+    executeTransaction(txb, (txbResponse) => {
+      // Now txbResponse.effects should be a proper object
+      const createdNft = txbResponse.effects?.created?.find(e => e.owner.AddressOwner === account.address);
       if (createdNft) {
         client.getObject({
           id: createdNft.reference.objectId,
