@@ -7,7 +7,7 @@ const NftModal = ({ nft, onClose }) => {
   // Extract display properties, providing default values
   const name = nft.data?.display?.data?.name || 'Donation NFT';
   // Generate Identicon based on NFT objectId
-  const identiconHash = nft.data.objectId || 'default_hash_for_identicon_if_missing'; // Use objectId as hash, or a fallback
+  const identiconHash = nft.data.objectId || 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'; // Use objectId as hash, or a fallback
   const identiconOptions = {
     size: 200, // Set a reasonable size for the identicon
     format: 'svg',
