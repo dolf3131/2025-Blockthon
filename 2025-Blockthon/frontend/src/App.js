@@ -185,73 +185,7 @@ function App() {
     executeTransaction(txb);
   };
 
-  const handleAmountChange = (id, value) => {
-    setDonationAmounts(prev => ({ ...prev, [id]: value }));
-  }
-
-  const formatSui = (mistAmount) => {
-    const suiAmount = mistAmount / 1_000_000_000;
-    return `${suiAmount.toFixed(3)} SUI`;
-  };
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Sui Donation dApp</h1>
-        <ConnectButton />
-      </header>
-      <main>
-        {account ? (
-          <div>
-            <h2>Welcome, {account.address.slice(0, 6)}...{account.address.slice(-4)}</h2>
-            
-            {!selectedCampaign ? (
-              <>
-                <CreateCampaignForm 
-                  name={name} setName={setName}
-                  description={description} setDescription={setDescription}
-                  organizerName={organizerName} setOrganizerName={setOrganizerName}
-                  goal={goal} setGoal={setGoal}
-                  duration={duration} setDuration={duration}
-                  createCampaign={createCampaign}
-                />
-
-                <CampaignList 
-                  isLoading={isLoading} isError={isError} campaigns={campaigns}
-                  setSelectedCampaign={setSelectedCampaign}
-                  donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
-                  donationMessages={donationMessages} setDonationMessages={setDonationMessages}
-                  donate={donate} account={account} withdraw={withdraw}
-                  formatSui={formatSui}
-                />
-              </>
-            ) : (
-              <CampaignDetail 
-                campaign={selectedCampaign} setSelectedCampaign={setSelectedCampaign}
-                account={account} donate={donate} withdraw={withdraw}
-                donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
-                donationMessages={donationMessages} setDonationMessages={setDonationMessages}
-                PACKAGE_ID={PACKAGE_ID}
-                formatSui={formatSui}
-              />
-            )}
-          </div>
-        ) : (
-          <p>Please connect your wallet to continue.</p>
-        )}
-      </main>
-
-      {isModalOpen && modalNft && (
-        <NftModal
-          nft={modalNft}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-export default App;
+  
 
   
 
