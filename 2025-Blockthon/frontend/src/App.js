@@ -153,15 +153,20 @@ function App() {
 
     console.log("Calling executeTransaction from donate...");
     executeTransaction(txb, (txbResponse) => {
+      console.log("txbResponse.effects?.created:", txbResponse.effects?.created);
       const createdNft = txbResponse.effects?.created?.find(e => {
         return e.owner.AddressOwner?.trim().toLowerCase() === account.address.trim().toLowerCase();
       });
+      console.log("createdNft after find:", createdNft);
 
       if (createdNft) {
         client.getObject({
           id: createdNft.reference.objectId,
           options: { showContent: true, showDisplay: true },
         }).then(nftDetails => {
+          console.log("nftDetails after fetch:", nftDetails);
+          console.log("nftDetails.data?.type:", nftDetails.data?.type);
+          console.log("Expected NFT type:", `${PACKAGE_ID}::donation::DonationNFT`);
           if (nftDetails.data?.type === `${PACKAGE_ID}::donation::DonationNFT`) {
              setModalNft(nftDetails);
              setIsModalOpen(true);
