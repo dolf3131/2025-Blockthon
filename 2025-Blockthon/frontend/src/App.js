@@ -57,21 +57,20 @@ function App() {
 
   const executeTransaction = (txb, onSuccessCallback) => {
     signAndExecute(
-      { transaction: txb },
+      {
+        transaction: txb,
+        options: {
+          showEffects: true, // Request the effects object
+        },
+      },
       {
         onSuccess: (result) => {
-          console.log('Full transaction result:', result); // Added for debugging
-          try {
-            if (onSuccessCallback) {
-              onSuccessCallback(result);
-            } else {
-              alert('Transaction successful!');
-            }
-          } catch (e) {
-            console.error("Error in onSuccess callback:", e);
-            alert("Transaction succeeded, but there was an error processing the result.");
+          console.log('Transaction successful:', result);
+          if (onSuccessCallback) {
+            onSuccessCallback(result);
+          } else {
+            alert('Transaction successful!');
           }
-
           setTimeout(() => {
             refetch();
           }, 2000);
@@ -144,19 +143,21 @@ function App() {
     });
 
     executeTransaction(txb, (result) => {
-      const createdNft = result.effects.created.find(e => e.owner.AddressOwner === account.address);
+      // Now result.effects should be a proper object
+      const createdNft = result.effects?.created?.find(e => e.owner.AddressOwner === account.address);
       if (createdNft) {
         client.getObject({
           id: createdNft.reference.objectId,
           options: { showContent: true, showDisplay: true },
         }).then(nftDetails => {
-          if (nftDetails.data.type === `${PACKAGE_ID}::donation::DonationNFT`) {
+          if (nftDetails.data?.type === `${PACKAGE_ID}::donation::DonationNFT`) {
              setModalNft(nftDetails);
              setIsModalOpen(true);
           }
         });
       } else {
-        alert('Donation successful! NFT created.');
+        // Fallback alert if NFT is not found in effects for any reason
+        alert('Donation successful! A commemorative NFT has been sent to your wallet.');
       }
     });
   };
