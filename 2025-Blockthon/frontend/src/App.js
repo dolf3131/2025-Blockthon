@@ -56,10 +56,12 @@ function App() {
   }, [eventData, client]);
 
   const executeTransaction = (txb, onSuccessCallback) => {
+    console.log("Executing signAndExecute...");
     signAndExecute(
       { transaction: txb },
       {
         onSuccess: (result) => {
+          console.log('signAndExecute onSuccess triggered.', result);
           setTimeout(() => {
             client.getTransactionBlock({
               digest: result.digest,
@@ -67,25 +69,189 @@ function App() {
                 showEffects: true,
               },
             }).then(txbResponse => {
+              console.log('getTransactionBlock successful:', txbResponse);
               if (onSuccessCallback) {
                 onSuccessCallback(txbResponse);
               } else {
                 alert('Transaction successful!');
               }
             });
-          }, 2000); // Add a delay to allow the transaction to be indexed
+          }, 2000);
 
           setTimeout(() => {
             refetch();
           }, 2000);
         },
         onError: (error) => {
-          console.error('Transaction error:', error);
+          console.error('signAndExecute onError triggered:', error);
           alert(`Error: ${error.message}`);
         },
       }
     );
   };
+
+  const createCampaign = () => {
+    if (!account || !name || !description || !organizerName || !goal || !duration) {
+      alert("Please fill out all fields.");
+      return;
+    }
+    const txb = new Transaction();
+    try {
+      const goalAmount = parseFloat(goal) * 1_000_000_000;
+      if (isNaN(goalAmount) || goalAmount <= 0) {
+        alert("Please enter a valid goal amount.");
+        return;
+      }
+
+      const now = new Date();
+      const deadline = new Date(now.getFullYear(), now.getMonth(), now.getDate() + parseInt(duration, 10), 23, 59, 59, 999);
+
+      txb.moveCall({
+        target: `${PACKAGE_ID}::donation::create_campaign`,
+        arguments: [
+            txb.pure.string(name),
+            txb.pure.string(description),
+            txb.pure.string(organizerName),
+            txb.pure.address(account.address),
+            txb.pure.u64(goalAmount),
+            txb.pure.u64(deadline.getTime())
+        ],
+      });
+      console.log("Calling executeTransaction from createCampaign...");
+      executeTransaction(txb);
+      setName("");
+      setDescription("");
+      setOrganizerName("");
+      setDuration("");
+      setGoal("");
+    } catch (error) {
+      console.error("Error during transaction building in createCampaign:", error);
+      alert(`Error building transaction: ${error.message}`);
+    }
+  };
+
+  const donate = (campaignId, amount, message) => {
+    console.log("Donate function called.");
+    if (!account || !amount) return;
+    const parsedAmount = parseInt(amount, 10);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      alert("Please enter a valid donation amount.");
+      return;
+    }
+    const txb = new Transaction();
+    const [splitCoin] = txb.splitCoins(txb.gas, [txb.pure.u64(parsedAmount)]);
+
+    txb.moveCall({
+      target: `${PACKAGE_ID}::donation::donate`,
+      arguments: [
+          txb.object(campaignId),
+          splitCoin,
+          txb.pure.string(message),
+          txb.object('0x6')
+      ],
+    });
+
+    console.log("Calling executeTransaction from donate...");
+    executeTransaction(txb, (txbResponse) => {
+      const createdNft = txbResponse.effects?.created?.find(e => {
+        return e.owner.AddressOwner?.trim().toLowerCase() === account.address.trim().toLowerCase();
+      });
+
+      if (createdNft) {
+        client.getObject({
+          id: createdNft.reference.objectId,
+          options: { showContent: true, showDisplay: true },
+        }).then(nftDetails => {
+          if (nftDetails.data?.type === `${PACKAGE_ID}::donation::DonationNFT`) {
+             setModalNft(nftDetails);
+             setIsModalOpen(true);
+          }
+        });
+      } else {
+        // Fallback alert if NFT is not found in effects for any reason
+        alert('Donation successful! A commemorative NFT has been sent to your wallet.');
+      }
+    });
+  };
+
+  const withdraw = (campaignId) => {
+    if (!account) return;
+    const txb = new Transaction();
+    txb.moveCall({
+      target: `${PACKAGE_ID}::donation::withdraw`,
+      arguments: [txb.object(campaignId)],
+    });
+    console.log("Calling executeTransaction from withdraw...");
+    executeTransaction(txb);
+  };
+
+  const handleAmountChange = (id, value) => {
+    setDonationAmounts(prev => ({ ...prev, [id]: value }));
+  }
+
+  const formatSui = (mistAmount) => {
+    const suiAmount = mistAmount / 1_000_000_000;
+    return `${suiAmount.toFixed(3)} SUI`;
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>Sui Donation dApp</h1>
+        <ConnectButton />
+      </header>
+      <main>
+        {account ? (
+          <div>
+            <h2>Welcome, {account.address.slice(0, 6)}...{account.address.slice(-4)}</h2>
+            
+            {!selectedCampaign ? (
+              <>
+                <CreateCampaignForm 
+                  name={name} setName={setName}
+                  description={description} setDescription={setDescription}
+                  organizerName={organizerName} setOrganizerName={setOrganizerName}
+                  goal={goal} setGoal={setGoal}
+                  duration={duration} setDuration={duration}
+                  createCampaign={createCampaign}
+                />
+
+                <CampaignList 
+                  isLoading={isLoading} isError={isError} campaigns={campaigns}
+                  setSelectedCampaign={setSelectedCampaign}
+                  donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
+                  donationMessages={donationMessages} setDonationMessages={setDonationMessages}
+                  donate={donate} account={account} withdraw={withdraw}
+                  formatSui={formatSui}
+                />
+              </>
+            ) : (
+              <CampaignDetail 
+                campaign={selectedCampaign} setSelectedCampaign={setSelectedCampaign}
+                account={account} donate={donate} withdraw={withdraw}
+                donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
+                donationMessages={donationMessages} setDonationMessages={setDonationMessages}
+                PACKAGE_ID={PACKAGE_ID}
+                formatSui={formatSui}
+              />
+            )}
+          </div>
+        ) : (
+          <p>Please connect your wallet to continue.</p>
+        )}
+      </main>
+
+      {isModalOpen && modalNft && (
+        <NftModal
+          nft={modalNft}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
 
   const createCampaign = () => {
     if (!account || !name || !description || !organizerName || !goal || !duration) {
