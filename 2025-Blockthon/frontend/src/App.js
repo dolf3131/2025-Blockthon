@@ -190,10 +190,6 @@ function App() {
     executeTransaction(txb);
   };
 
-  
-
-  
-
   const handleAmountChange = (id, value) => {
     setDonationAmounts(prev => ({ ...prev, [id]: value }));
   }
@@ -221,7 +217,7 @@ function App() {
                   description={description} setDescription={setDescription}
                   organizerName={organizerName} setOrganizerName={setOrganizerName}
                   goal={goal} setGoal={setGoal}
-                  duration={duration} setDuration={setDuration}
+                  duration={duration} setDuration={duration}
                   createCampaign={createCampaign}
                 />
 
