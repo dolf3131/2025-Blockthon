@@ -217,7 +217,7 @@ function App() {
                   description={description} setDescription={setDescription}
                   organizerName={organizerName} setOrganizerName={setOrganizerName}
                   goal={goal} setGoal={setGoal}
-                  duration={duration} setDuration={duration}
+                  duration={duration} setDuration={setDuration}
                   createCampaign={createCampaign}
                 />
 
