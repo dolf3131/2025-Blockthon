@@ -6,8 +6,10 @@ module donation_system::donation {
     use sui::event;
     use sui::tx_context::{Self, TxContext};
     use sui::clock::{Self, Clock};
-    use std::string::{String};
+    use std::string::{Self, String};
     use sui::object::{Self, ID, UID};
+    use sui::display;
+    use sui::package::{Self, claim};
 
     // === Errors ===
     const ENotCampaignOwner: u64 = 0;
@@ -36,6 +38,39 @@ module donation_system::donation {
         amount_donated: u64,
         timestamp_ms: u64,
         campaign_name: String,
+    }
+
+    // Define the One-Time Witness struct
+    public struct DONATION has drop {}
+
+    // Updated init function for DonationNFT
+    fun init(otw: DONATION, ctx: &mut TxContext) {
+        let keys = vector<String>[
+            string::utf8(b"name"),
+            string::utf8(b"description"),
+            string::utf8(b"image_url"),
+            string::utf8(b"project_url"),
+        ];
+
+        let values = vector<String>[
+            string::utf8(b"Donation NFT for "),
+            string::utf8(b"A commemorative NFT for your generous donation to "),
+            string::utf8(b"https://example.com/nft_image.png"), // Placeholder image URL
+            string::utf8(b"https://example.com/"), // Placeholder project URL
+        ];
+
+        let publisher = package::claim(otw, ctx); // Get publisher using claim
+
+        let mut display = display::new_with_fields<DonationNFT>( // Made display mutable
+            &publisher,
+            keys,
+            values,
+            ctx
+        );
+
+        display::update_version(&mut display);
+        transfer::public_share_object(display);
+        package::burn_publisher(publisher); // Burn the publisher object
     }
 
     // === Events ===
