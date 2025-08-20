@@ -25,6 +25,9 @@
       var hash = this.hash;
       var options = this.options;
 
+      console.log("Identicon render: options", options);
+      console.log("Identicon render: options.background", options.background);
+
       var foreColor = [0, 0, 255, 255]; // Hardcoded blue
       var backColor = [255, 255, 255, 255]; // Hardcoded white
 
