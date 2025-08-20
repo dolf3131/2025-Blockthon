@@ -7,14 +7,6 @@
  */
 
 (function() {
-  var PNGlib;
-
-  if (typeof module !== 'undefined' && module.exports) {
-    PNGlib = require('./pnglib');
-  } else {
-    PNGlib = window.PNGlib;
-  }
-
   var Identicon = function(hash, options) {
     this.hash = hash;
     this.options = options || {};
@@ -71,16 +63,8 @@
 
       if (options.format === 'svg') {
         return btoa(canvas.join(''));
-      } else if (options.format === 'png') {
-        var png = new PNGlib(draw, draw, 256);
-        for (var i = 0; i < 9; i++) {
-          for (var j = 0; j < 9; j++) {
-            if (data[i][j]) {
-              png.fillRect(margin + i * block, margin + j * block, block, block, rgba);
-            }
-          }
-        }
-        return png.getBase64();
+      } else {
+        throw new Error("Identicon.js: Only SVG format is supported in this build.");
       }
     },
 
