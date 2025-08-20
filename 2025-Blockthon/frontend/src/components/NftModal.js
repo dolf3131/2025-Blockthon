@@ -1,11 +1,23 @@
 import React from 'react';
+import Identicon from '../utils/identicon';
 
 const NftModal = ({ nft, onClose }) => {
   if (!nft) return null;
 
   // Extract display properties, providing default values
   const name = nft.data?.display?.data?.name || 'Donation NFT';
-  const imageUrl = nft.data?.display?.data?.image_url || 'https://via.placeholder.com/300'; // Placeholder image
+  // Generate Identicon based on NFT objectId
+  const identiconHash = nft.data.objectId; // Use objectId as hash
+  const identiconOptions = {
+    size: 200, // Set a reasonable size for the identicon
+    format: 'svg',
+    margin: 0.1,
+    background: [240, 240, 240, 255], // Light gray background
+    saturation: 0.7,
+    brightness: 0.5
+  };
+  const identiconSvgBase64 = new Identicon(identiconHash, identiconOptions).toString();
+  const imageUrl = `data:image/svg+xml;base64,${identiconSvgBase64}`;
   const description = nft.data?.display?.data?.description || 'Thank you for your generous donation!';
 
   return (
