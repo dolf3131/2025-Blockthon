@@ -38,12 +38,18 @@ const CampaignDetail = ({
   );
 
   useEffect(() => {
+    console.log("donatedEventData:", donatedEventData);
+
     if (!donatedEventData || !donatedEventData.data) {
       setGroupedMessages({});
       return;
     }
 
+    console.log("All events for this event type:", donatedEventData.data);
+
     const filteredEvents = donatedEventData.data.filter(event => event.parsedJson.campaign_id === campaign.data.objectId);
+    console.log("Filtered events for this campaign:", filteredEvents);
+    console.log("Current campaign ID:", campaign.data.objectId);
 
     const newGroupedMessages = {};
     filteredEvents.forEach(event => {
