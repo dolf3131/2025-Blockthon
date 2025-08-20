@@ -1,23 +1,73 @@
 import React from 'react';
-import Identicon from '../utils/identicon';
+
+const generateIdenticonSvg = (hash, size = 200) => {
+  // Ensure hash is a string and long enough
+  hash = String(hash || '').padEnd(15, '0'); // Pad with '0' if too short
+
+  const colors = [];
+  for (let i = 0; i < 3; i++) {
+    colors.push(parseInt(hash.substring(i * 2, i * 2 + 2), 16));
+  }
+  const foregroundColor = `rgb(${colors[0]}, ${colors[1]}, ${colors[2]})`;
+  const backgroundColor = `rgb(240, 240, 240)`; // Light gray
+
+  const data = [];
+  for (let i = 0; i < 5; i++) {
+    data[i] = [];
+    for (let j = 0; j < 5; j++) {
+      data[i][j] = 0;
+    }
+  }
+
+  // Center column
+  for (let i = 0; i < 5; i++) {
+    if (parseInt(hash.charAt(i), 16) % 2 === 0) {
+      data[2][i] = 1;
+    }
+  }
+
+  // Side columns (symmetric)
+  for (let i = 0; i < 5; i++) {
+    if (parseInt(hash.charAt(i + 5), 16) % 2 === 0) {
+      data[1][i] = 1;
+      data[3][i] = 1;
+    }
+  }
+
+  // Outer columns (symmetric)
+  for (let i = 0; i < 5; i++) {
+    if (parseInt(hash.charAt(i + 10), 16) % 2 === 0) {
+      data[0][i] = 1;
+      data[4][i] = 1;
+    }
+  }
+
+  const blockSize = size / 5;
+  let svgRects = '';
+
+  // Background
+  svgRects += `<rect x="0" y="0" width="${size}" height="${size}" fill="${backgroundColor}" />`;
+
+  // Grid
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      if (data[i][j]) {
+        svgRects += `<rect x="${i * blockSize}" y="${j * blockSize}" width="${blockSize}" height="${blockSize}" fill="${foregroundColor}" />`;
+      }
+    }
+  }
+
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${svgRects}</svg>`;
+};
 
 const NftModal = ({ nft, onClose }) => {
   if (!nft) return null;
 
   // Extract display properties, providing default values
   const name = nft.data?.display?.data?.name || 'Donation NFT';
-  // Generate Identicon based on NFT objectId
-  const identiconHash = nft.data.objectId || 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'; // Use objectId as hash, or a fallback
-  const identiconOptions = {
-    size: 200, // Set a reasonable size for the identicon
-    format: 'svg',
-    margin: 0.1,
-    background: [240, 240, 240, 255], // Light gray background
-    saturation: 0.7,
-    brightness: 0.5
-  };
-  const identiconSvgBase64 = new Identicon(identiconHash, identiconOptions).toString();
-  const imageUrl = `data:image/svg+xml;base64,${identiconSvgBase64}`;
+  const identiconHash = nft.data.objectId || 'default_fallback_hash_for_identicon'; // Use objectId as hash, or a fallback
+  const svgString = generateIdenticonSvg(identiconHash, 200); // Generate SVG string
+  const imageUrl = `data:image/svg+xml;base64,${btoa(svgString)}`; // Base64 encode the SVG string
   const description = nft.data?.display?.data?.description || 'Thank you for your generous donation!';
 
   return (
