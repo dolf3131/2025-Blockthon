@@ -146,6 +146,7 @@ function App() {
       ],
     });
 
+    console.log("Calling executeTransaction from donate...");
     executeTransaction(txb, (txbResponse) => {
       const createdNft = txbResponse.effects?.created?.find(e => {
         return e.owner.AddressOwner?.trim().toLowerCase() === account.address.trim().toLowerCase();
@@ -175,6 +176,7 @@ function App() {
       target: `${PACKAGE_ID}::donation::withdraw`,
       arguments: [txb.object(campaignId)],
     });
+    console.log("Calling executeTransaction from withdraw...");
     executeTransaction(txb);
   };
 
