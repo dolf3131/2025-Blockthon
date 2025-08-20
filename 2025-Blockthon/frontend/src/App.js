@@ -65,6 +65,7 @@ function App() {
       },
       {
         onSuccess: (result) => {
+          console.log('Full transaction result:', result); // Added for debugging
           console.log('Transaction successful:', result);
           if (onSuccessCallback) {
             onSuccessCallback(result);
