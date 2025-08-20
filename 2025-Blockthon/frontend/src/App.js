@@ -165,9 +165,9 @@ function App() {
           options: { showContent: true, showDisplay: true },
         }).then(nftDetails => {
           console.log("nftDetails after fetch:", nftDetails);
-          console.log("nftDetails.data?.type:", nftDetails.data?.type);
+          console.log("nftDetails.data?.type:", nftDetails.data?.content?.type);
           console.log("Expected NFT type:", `${PACKAGE_ID}::donation::DonationNFT`);
-          if (nftDetails.data?.type === `${PACKAGE_ID}::donation::DonationNFT`) {
+          if (nftDetails.data?.content?.type === `${PACKAGE_ID}::donation::DonationNFT`) {
              setModalNft(nftDetails);
              setIsModalOpen(true);
           }
