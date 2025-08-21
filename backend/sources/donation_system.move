@@ -221,10 +221,18 @@ module donation_system::donation {
 
     // === Getter Functions ===
 
-    public fun get_user_nfts(profiles: &Profiles, user: address): vector<NftId> {
+    public fun get_user_nfts(profiles: &Profiles, user: address): vector<address> {
         if (table::contains(&profiles.profiles, user)) {
             let user_profile = table::borrow(&profiles.profiles, user);
-            user_profile.nfts
+            let mut nft_addresses = vector<address>[];
+            let mut i = 0;
+            let len = vector::length(&user_profile.nfts);
+            while (i < len) {
+                let nft_id = vector::borrow(&user_profile.nfts, i);
+                vector::push_back(&mut nft_addresses, object::id_to_address(&nft_id.nft_id));
+                i = i + 1;
+            };
+            nft_addresses
         } else {
             vector[]
         }

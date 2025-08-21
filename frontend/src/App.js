@@ -186,7 +186,7 @@ function App() {
     txb.moveCall({
       target: `${PACKAGE_ID}::donation::donate`,
       arguments: [
-          txb.object(profilesId),
+          txb.object(PROFILES_OBJECT_ID),
           txb.object(campaignId),
           splitCoin,
           txb.pure.string(message),
