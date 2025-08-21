@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useCurrentAccount, useSignAndExecuteTransactionBlock } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { JsonRpcProvider, Connection } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 
 const Profile = () => {
     const account = useCurrentAccount();
-    const { mutate: signAndExecute } = useSignAndExecuteTransactionBlock();
+    const { mutate: signAndExecute } = useSignAndExecuteTransaction();
     const [nfts, setNfts] = useState([]);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -54,7 +54,7 @@ const Profile = () => {
         getProfile();
     }, [account]);
 
-    const createProfile = async () => {
+    const createProfile = () => {
         if (!account) return;
         const txb = new Transaction();
         txb.moveCall({
