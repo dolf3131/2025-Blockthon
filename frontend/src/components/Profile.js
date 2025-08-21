@@ -227,15 +227,19 @@ const Profile = ({ client, profilesId }) => {
             <h3>My Created Campaigns</h3>
             <div className="campaign-list">
                 {createdCampaigns.length > 0 ? (
-                    createdCampaigns.map(campaign => (
-                        <div key={campaign.data.objectId} className="campaign-card-profile">
-                            <h4>{campaign.data.content.fields.name}</h4>
-                            <p>Description: {campaign.data.content.fields.description}</p>
-                            <p>Goal: {campaign.data.content.fields.goal} MIST</p>
-                            <p>Donated: {campaign.data.content.fields.donated_amount} MIST</p>
-                            <p>Active: {campaign.data.content.fields.active ? 'Yes' : 'No'}</p>
-                        </div>
-                    ))
+                    createdCampaigns.map(campaign => {
+                        const deadlineDate = new Date(Number(campaign.data.content.fields.deadline)).toLocaleString();
+                        return (
+                            <div key={campaign.data.objectId} className="campaign-card-profile">
+                                <h4>{campaign.data.content.fields.name}</h4>
+                                <p>Description: {campaign.data.content.fields.description}</p>
+                                <p>Goal: {(Number(campaign.data.content.fields.goal) / 1_000_000_000).toFixed(3)} SUI</p>
+                                <p>Donated: {(Number(campaign.data.content.fields.donated_amount) / 1_000_000_000).toFixed(3)} SUI</p>
+                                <p>Deadline: {deadlineDate}</p>
+                                <p>Active: {campaign.data.content.fields.active ? 'Yes' : 'No'}</p>
+                            </div>
+                        );
+                    })
                 ) : (
                     <p>You haven't created any campaigns yet.</p>
                 )}
