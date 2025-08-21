@@ -30,7 +30,7 @@ const Profile = ({ client, profilesId }) => {
                 const nftIds = [];
                 for (let i = 0; i < rawBytes.length; i += 32) {
                     const addressBytes = rawBytes.slice(i, i + 32);
-                    const address = '0x' + Buffer.from(addressBytes).toString('hex');
+                    const address = '0x' + Array.from(addressBytes).map(b => b.toString(16).padStart(2, '0')).join('');
                     nftIds.push(address);
                 }
 
