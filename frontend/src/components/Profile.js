@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
-import { bcs } from '@mysten/sui/bcs';
-import { fromHex, toHex } from '@mysten/bcs';
 import { getSuiMoveConfig } from '@mysten/sui/client';
 
 const Profile = ({ client, profilesId }) => {
@@ -30,15 +28,25 @@ const Profile = ({ client, profilesId }) => {
 
             if (res.results && res.results[0]) {
                 const rawBytes = res.results[0].returnValues[0][0];
-                // Use BCS to deserialize the vector<address>
-                
-                
-                const SuiAddress = bcs.fixedArray(32, bcs.u8()).transform({
-                    input: (addr) => fromHex(addr),
-                    output: (bytes) => toHex(bytes),
-                });
-                const SuiAddressVectorSchema = bcs.vector(SuiAddress);
-                const nftIds = SuiAddressVectorSchema.parse(rawBytes);
+                // Manually parse the vector<address> (ULEB128 length + 32-byte addresses)
+                let offset = 0;
+                let length = 0;
+                let sh = 0;
+                while (true) {
+                    const byte = rawBytes[offset++];
+                    length |= (byte & 0x7f) << sh;
+                    if ((byte & 0x80) === 0) {
+                        break;
+                    }
+                    sh += 7;
+                }
+
+                const nftIds = [];
+                for (let i = 0; i < length; i++) {
+                    const addressBytes = rawBytes.slice(offset, offset + 32);
+                    nftIds.push('0x' + Array.from(addressBytes).map(b => b.toString(16).padStart(2, '0')).join(''));
+                    offset += 32;
+                }
                 console.log('Deserialized NFT IDs:', nftIds);
 
                 if (nftIds.length > 0) {
