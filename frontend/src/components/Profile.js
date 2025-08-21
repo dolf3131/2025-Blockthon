@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
-import { BCS } from '@mysten/sui/bcs';
+import { BCS } from '@mysten/bcs';
 import { fromHex, toHex } from '@mysten/bcs';
 import { getSuiMoveConfig } from '@mysten/sui/client';
 
