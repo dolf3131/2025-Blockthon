@@ -67,74 +67,52 @@ const generateIdenticonSvg = (hash, size = 200) => {
 const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
     const [nfts, setNfts] = useState([]);
+    const [createdCampaigns, setCreatedCampaigns] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const getProfileNfts = async () => {
-        if (!account || !client || !profilesId) return;
-        setLoading(true);
+        // ... existing code ...
+    };
+
+    const getCreatedCampaigns = async () => {
+        if (!account || !client) return;
         try {
-            const tx = new Transaction();
-            tx.moveCall({
-                target: `${PACKAGE_ID}::donation::get_user_nfts`,
-                arguments: [tx.object(profilesId), tx.pure.address(account.address)],
+            const events = await client.queryEvents({
+                query: {
+                    MoveEventType: `${PACKAGE_ID}::donation::CampaignCreated`,
+                },
+                limit: 100, // Adjust limit as needed
             });
 
-            const res = await client.devInspectTransactionBlock({
-                sender: account.address,
-                transactionBlock: tx,
+            const userCampaignEvents = events.data.filter(event => {
+                return event.parsedJson.beneficiary === account.address;
             });
 
-            console.log('DevInspect Result:', JSON.stringify(res, null, 2));
+            const campaignIds = userCampaignEvents.map(event => event.parsedJson.campaign_id);
 
-            if (res.results && res.results[0]) {
-                const rawBytes = res.results[0].returnValues[0][0];
-                // Manually parse the vector<address> (ULEB128 length + 32-byte addresses)
-                let offset = 0;
-                let length = 0;
-                let sh = 0;
-                while (true) {
-                    const byte = rawBytes[offset++];
-                    length |= (byte & 0x7f) << sh;
-                    if ((byte & 0x80) === 0) {
-                        break;
-                    }
-                    sh += 7;
+            if (campaignIds.length > 0) {
+                const campaignObjects = [];
+                for (const campaignId of campaignIds) {
+                    const campaignObject = await client.getObject({
+                        id: campaignId,
+                        options: {
+                            showContent: true,
+                        }
+                    });
+                    campaignObjects.push(campaignObject);
                 }
-
-                const nftIds = [];
-                for (let i = 0; i < length; i++) {
-                    const addressBytes = rawBytes.slice(offset, offset + 32);
-                    nftIds.push('0x' + Array.from(addressBytes).map(b => b.toString(16).padStart(2, '0')).join(''));
-                    offset += 32;
-                }
-                console.log('Deserialized NFT IDs:', nftIds);
-
-                if (nftIds.length > 0) {
-                    const nftObjects = [];
-                    for (const nftId of nftIds) {
-                        const nftObject = await client.getObject({
-                            id: nftId,
-                            options: {
-                                showContent: true,
-                            }
-                        });
-                        nftObjects.push(nftObject);
-                    }
-                    console.log('Fetched NFT Objects:', nftObjects);
-                    setNfts(nftObjects);
-                } else {
-                    setNfts([]);
-                }
+                setCreatedCampaigns(campaignObjects);
+            } else {
+                setCreatedCampaigns([]);
             }
         } catch (error) {
-            console.error('Error fetching profile nfts:', error);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching created campaigns:', error);
         }
     };
 
     useEffect(() => {
         getProfileNfts();
+        getCreatedCampaigns();
     }, [account, client, profilesId]);
 
 
@@ -181,6 +159,23 @@ const Profile = ({ client, profilesId }) => {
                     })
                 ) : (
                     <p>You don't own any NFTs yet.</p>
+                )}
+            </div>
+
+            <h3>My Created Campaigns</h3>
+            <div className="campaign-list">
+                {createdCampaigns.length > 0 ? (
+                    createdCampaigns.map(campaign => (
+                        <div key={campaign.data.objectId} className="campaign-card-profile">
+                            <h4>{campaign.data.content.fields.name}</h4>
+                            <p>Description: {campaign.data.content.fields.description}</p>
+                            <p>Goal: {campaign.data.content.fields.goal} MIST</p>
+                            <p>Donated: {campaign.data.content.fields.donated_amount} MIST</p>
+                            <p>Active: {campaign.data.content.fields.active ? 'Yes' : 'No'}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p>You haven't created any campaigns yet.</p>
                 )}
             </div>
         </div>
