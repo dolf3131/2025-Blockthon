@@ -2,14 +2,14 @@ module donation_system::donation {
     use sui::coin::{Self, Coin};
     use sui::balance::{Self, Balance};
     use sui::sui::SUI;
-    use sui::transfer;
+    
     use sui::event;
-    use sui::tx_context::{Self, TxContext};
+    
     use sui::clock::{Self, Clock};
     use std::string::{Self, String};
-    use sui::object::{Self, ID, UID};
+    
     use sui::display;
-    use sui::package::{Self, claim};
+    use sui::package;
     use sui::table::{Self, Table};
 
     // === Errors ===
@@ -58,6 +58,7 @@ module donation_system::donation {
     public struct DONATION has drop {}
 
     // Updated init function for DonationNFT
+    #[allow(lint(share_owned))]
     fun init(otw: DONATION, ctx: &mut TxContext) {
         let keys = vector<String>[
             string::utf8(b"name"),
@@ -83,10 +84,10 @@ module donation_system::donation {
         );
 
         display::update_version(&mut display);
-        transfer::public_share_object(display);
+        sui::transfer::public_share_object(display);
         package::burn_publisher(publisher);
 
-        transfer::share_object(Profiles {
+        sui::transfer::share_object(Profiles {
             id: object::new(ctx),
             profiles: table::new(ctx),
         });
@@ -147,7 +148,7 @@ module donation_system::donation {
             deadline,
         });
 
-        transfer::share_object(campaign);
+        sui::transfer::share_object(campaign);
     }
 
     public entry fun donate(
@@ -189,7 +190,7 @@ module donation_system::donation {
             vector::push_back(&mut user_profile.nfts, nft_id);
         };
 
-        transfer::public_transfer(nft, sender);
+        sui::transfer::public_transfer(nft, sender);
 
         event::emit(Donated {
             campaign_id: object::id(campaign),
@@ -209,7 +210,7 @@ module donation_system::donation {
         let new_balance = balance::split(&mut campaign.vault, total_amount);
         let funds = coin::from_balance(new_balance, ctx);
         
-        transfer::public_transfer(funds, campaign.beneficiary);
+        sui::transfer::public_transfer(funds, campaign.beneficiary);
 
         campaign.active = false;
 
@@ -221,21 +222,23 @@ module donation_system::donation {
 
     // === Getter Functions ===
 
-    public fun get_user_nfts(profiles: &Profiles, user: address): vector<address> {
-        if (table::contains(&profiles.profiles, user)) {
-            let user_profile = table::borrow(&profiles.profiles, user);
-            let mut nft_addresses = vector<address>[];
+    public fun get_user_nfts(profiles_obj: &Profiles, user_address: address): vector<address> {
+        let mut user_profile_nfts = vector::empty<address>();
+
+        if (table::contains(&profiles_obj.profiles, user_address)) {
+            let user_profile = table::borrow(&profiles_obj.profiles, user_address);
+            let nfts_vec = &user_profile.nfts; // This is a vector<NftId>
+
             let mut i = 0;
-            let len = vector::length(&user_profile.nfts);
+            let len = vector::length(nfts_vec);
             while (i < len) {
-                let nft_id = vector::borrow(&user_profile.nfts, i);
-                vector::push_back(&mut nft_addresses, object::id_to_address(&nft_id.nft_id));
+                let nft_id_struct = vector::borrow(nfts_vec, i);
+                vector::push_back(&mut user_profile_nfts, object::id_to_address(&nft_id_struct.nft_id));
                 i = i + 1;
             };
-            nft_addresses
-        } else {
-            vector[]
-        }
+        };
+
+        user_profile_nfts
     }
 
     public fun donated_amount(campaign: &DonationCampaign): u64 {
