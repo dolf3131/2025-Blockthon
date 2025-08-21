@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
-import { Bcs, getSuiMoveConfig } from '@mysten/bcs';
+import { Bcs, getSuiMoveConfig } from '@mysten/bcs/dist/esm/bcs';
 import { PACKAGE_ID } from '../config';
 
 const SUI_BCS_CONFIG = getSuiMoveConfig();
