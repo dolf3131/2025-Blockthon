@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
-import { BCS } from '@mysten/bcs';
+import { bcs } from '@mysten/sui/bcs';
 import { fromHex, toHex } from '@mysten/bcs';
 import { getSuiMoveConfig } from '@mysten/sui/client';
 
@@ -10,8 +10,6 @@ const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
     const [nfts, setNfts] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const bcs = new BCS(getSuiMoveConfig());
 
     const getProfileNfts = async () => {
         if (!account || !client || !profilesId) return;
