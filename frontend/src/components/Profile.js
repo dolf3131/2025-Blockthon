@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
+import { PACKAGE_ID } from '../config';
+
 const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
     const [nfts, setNfts] = useState([]);
@@ -13,7 +15,7 @@ const Profile = ({ client, profilesId }) => {
         try {
             const tx = new Transaction();
             tx.moveCall({
-                target: `${'0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84'}::donation::get_user_nfts`,
+                target: `${PACKAGE_ID}::donation::get_user_nfts`,
                 arguments: [tx.object(profilesId), tx.pure(account.address)],
             });
 

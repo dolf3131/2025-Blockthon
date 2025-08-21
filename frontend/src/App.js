@@ -10,7 +10,7 @@ import CampaignDetail from './components/CampaignDetail';
 import NftModal from './components/NftModal'; // Import the modal component
 import Profile from './components/Profile';
 
-const PACKAGE_ID = "0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84";
+import { PACKAGE_ID, PROFILES_OBJECT_ID } from './config';
 
 function Home({ account, client, signAndExecute, campaigns, selectedCampaign, setSelectedCampaign, donationAmounts, handleAmountChange, donationMessages, setDonationMessages, donate, withdraw, formatSui, name, setName, description, setDescription, organizerName, setOrganizerName, goal, setGoal, duration, setDuration, createCampaign, isLoading, isError }) {
   return (
@@ -65,7 +65,7 @@ function App() {
   const [donationMessages, setDonationMessages] = useState({});
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
-  const [profilesId, setProfilesId] = useState("PROFILES_OBJECT_ID"); // TODO: Replace with actual Profiles object ID
+  const [profilesId, setProfilesId] = useState(PROFILES_OBJECT_ID);
 
   // State for the NFT modal
   const [isModalOpen, setIsModalOpen] = useState(false);
