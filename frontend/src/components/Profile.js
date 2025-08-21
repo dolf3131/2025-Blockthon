@@ -31,7 +31,7 @@ const Profile = ({ client, profilesId }) => {
                 const rawBytes = res.results[0].returnValues[0][0];
                 // Use BCS to deserialize the vector<address>
                 
-                bcs.registerAddressType('address', 32, 'hex'); // Register address type
+                bcs.registerAddressType('address', 20, 'hex'); // Register address type
                 const nftIds = bcs.de('vector<address>', rawBytes);
 
                 if (nftIds.length > 0) {
