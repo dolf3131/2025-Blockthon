@@ -33,6 +33,7 @@ const Profile = ({ client, profilesId }) => {
                 
                 bcs.registerAddressType('address', 20, 'hex'); // Register address type
                 const nftIds = bcs.de('vector<address>', rawBytes);
+                console.log('Deserialized NFT IDs:', nftIds);
 
                 if (nftIds.length > 0) {
                     const nftObjects = [];
