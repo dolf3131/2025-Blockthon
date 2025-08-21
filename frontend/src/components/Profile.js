@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
-import { Bcs, getSuiMoveConfig } from '@mysten/bcs';
+import { Bcs } from '@mysten/bcs';
 import { PACKAGE_ID } from '../config';
 
-const SUI_BCS_CONFIG = getSuiMoveConfig();
+const SUI_BCS_CONFIG = new Bcs();
 
 SUI_BCS_CONFIG.registerStructType("NftId", {
     nft_id: "address",
