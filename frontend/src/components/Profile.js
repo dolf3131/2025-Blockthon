@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
+import { BCS } from '@mysten/bcs';
+import { getSuiMoveConfig } from '@mysten/sui/client';
 
 const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
@@ -27,12 +29,10 @@ const Profile = ({ client, profilesId }) => {
 
             if (res.results && res.results[0]) {
                 const rawBytes = res.results[0].returnValues[0][0];
-                const nftIds = [];
-                for (let i = 0; i < rawBytes.length; i += 32) {
-                    const addressBytes = rawBytes.slice(i, i + 32);
-                    const address = '0x' + Array.from(addressBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-                    nftIds.push(address);
-                }
+                // Use BCS to deserialize the vector<address>
+                const bcs = new BCS(getSuiMoveConfig()); // Initialize BCS with Sui Move config
+                bcs.registerAddressType('address', 32, 'hex'); // Register address type
+                const nftIds = bcs.de('vector<address>', rawBytes);
 
                 if (nftIds.length > 0) {
                     const nftObjects = await client.multiGetObjects({
