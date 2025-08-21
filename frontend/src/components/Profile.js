@@ -35,17 +35,17 @@ const Profile = ({ client, profilesId }) => {
                 const nftIds = bcs.de('vector<address>', rawBytes);
 
                 if (nftIds.length > 0) {
-                    const nftObjects = await client.multiGetObjects({
-                        ids: nftIds,
-                        options: {
-                            showContent: true,
-                        }
-                    });
+                    const nftObjects = [];
+                    for (const nftId of nftIds) {
+                        const nftObject = await client.getObject({
+                            id: nftId,
+                            options: {
+                                showContent: true,
+                            }
+                        });
+                        nftObjects.push(nftObject);
+                    }
                     console.log('Fetched NFT Objects:', nftObjects);
-                    nftObjects.forEach(nft => {
-                        console.log('NFT Type:', nft.data.content.type);
-                        console.log('NFT Fields:', nft.data.content.fields);
-                    });
                     setNfts(nftObjects);
                 } else {
                     setNfts([]);
