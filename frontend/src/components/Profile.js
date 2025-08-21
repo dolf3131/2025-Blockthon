@@ -31,8 +31,12 @@ const Profile = ({ client, profilesId }) => {
                 const rawBytes = res.results[0].returnValues[0][0];
                 // Use BCS to deserialize the vector<address>
                 
-                bcs.registerAddressType('address', 20, 'hex'); // Register address type
-                const nftIds = bcs.de('vector<address>', rawBytes);
+                const { fromHex, toHex } = bcs;
+                const SuiAddress = bcs.fixedArray(32, bcs.u8()).transform({
+                    input: (addr) => fromHex(addr),
+                    output: (bytes) => toHex(bytes),
+                });
+                const nftIds = bcs.de(bcs.vector(SuiAddress), rawBytes);
                 console.log('Deserialized NFT IDs:', nftIds);
 
                 if (nftIds.length > 0) {
