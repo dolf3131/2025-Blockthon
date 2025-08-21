@@ -39,7 +39,8 @@ const Profile = ({ client, profilesId }) => {
                     input: (addr) => fromHex(addr),
                     output: (bytes) => toHex(bytes),
                 });
-                const nftIds = bcs.de(bcs.vector(SuiAddress), rawBytes);
+                const SuiAddressVectorSchema = bcs.vector(SuiAddress);
+                const nftIds = SuiAddressVectorSchema.parse(rawBytes);
                 console.log('Deserialized NFT IDs:', nftIds);
 
                 if (nftIds.length > 0) {
