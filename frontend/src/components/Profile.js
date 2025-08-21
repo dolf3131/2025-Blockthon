@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
-import { bcs } from '@mysten/sui/bcs';
+import { BCS } from '@mysten/sui/bcs';
+import { fromHex, toHex } from '@mysten/bcs';
 import { getSuiMoveConfig } from '@mysten/sui/client';
 
 const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
     const [nfts, setNfts] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const bcs = new BCS(getSuiMoveConfig());
 
     const getProfileNfts = async () => {
         if (!account || !client || !profilesId) return;
@@ -31,7 +34,7 @@ const Profile = ({ client, profilesId }) => {
                 const rawBytes = res.results[0].returnValues[0][0];
                 // Use BCS to deserialize the vector<address>
                 
-                const { fromHex, toHex } = bcs;
+                
                 const SuiAddress = bcs.fixedArray(32, bcs.u8()).transform({
                     input: (addr) => fromHex(addr),
                     output: (bytes) => toHex(bytes),
