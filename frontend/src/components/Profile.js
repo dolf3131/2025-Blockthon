@@ -62,6 +62,9 @@ const Profile = ({ client }) => {
         signAndExecute(
             {
                 transaction: txb,
+                options: {
+                    showEffects: true,
+                },
             },
             {
                 onSuccess: (result) => {
@@ -95,14 +98,17 @@ const Profile = ({ client }) => {
     }
 
     return (
-        <div>
+        <div className="profile-page">
             <h2>User Profile</h2>
-            <p><strong>Address:</strong> {account.address}</p>
+            <div className="card">
+                <p><strong>Address:</strong> {account.address}</p>
+            </div>
+
             <h3>My NFTs</h3>
             <div className="nft-list">
                 {nfts.length > 0 ? (
                     nfts.map(nft => (
-                        <div key={nft.data.objectId} className="nft-card">
+                        <div key={nft.data.objectId} className="nft-card-profile">
                             <h4>{nft.data.content.fields.campaign_name}</h4>
                             <p>Amount Donated: {nft.data.content.fields.amount_donated} SUI</p>
                         </div>
