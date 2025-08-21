@@ -10,6 +10,7 @@ module donation_system::donation {
     use sui::object::{Self, ID, UID};
     use sui::display;
     use sui::package::{Self, claim};
+    use sui::table::{Self, Table};
 
     // === Errors ===
     const ENotCampaignOwner: u64 = 0;
@@ -44,10 +45,13 @@ module donation_system::donation {
         nft_id: ID,
     }
 
-    public struct UserProfile has key, store {
-        id: UID,
-        owner: address,
+    public struct UserProfile has store {
         nfts: vector<NftId>,
+    }
+
+    public struct Profiles has key {
+        id: UID,
+        profiles: Table<address, UserProfile>,
     }
 
     // Define the One-Time Witness struct
@@ -69,9 +73,9 @@ module donation_system::donation {
             string::utf8(b"https://example.com/"), // Placeholder project URL
         ];
 
-        let publisher = package::claim(otw, ctx); // Get publisher using claim
+        let publisher = package::claim(otw, ctx);
 
-        let mut display = display::new_with_fields<DonationNFT>( // Made display mutable
+        let mut display = display::new_with_fields<DonationNFT>(
             &publisher,
             keys,
             values,
@@ -80,7 +84,12 @@ module donation_system::donation {
 
         display::update_version(&mut display);
         transfer::public_share_object(display);
-        package::burn_publisher(publisher); // Burn the publisher object
+        package::burn_publisher(publisher);
+
+        transfer::share_object(Profiles {
+            id: object::new(ctx),
+            profiles: table::new(ctx),
+        });
     }
 
     // === Events ===
@@ -103,19 +112,6 @@ module donation_system::donation {
     public struct Withdrawn has copy, drop {
         campaign_id: ID,
         amount: u64,
-    }
-
-    public entry fun create_user_profile(ctx: &mut TxContext) {
-        let profile = UserProfile {
-            id: object::new(ctx),
-            owner: tx_context::sender(ctx),
-            nfts: vector[],
-        };
-        transfer::transfer(profile, tx_context::sender(ctx));
-    }
-
-    public fun get_user_nfts(profile: &UserProfile): vector<NftId> {
-        profile.nfts
     }
 
     // === Public Functions ===
@@ -151,12 +147,11 @@ module donation_system::donation {
             deadline,
         });
 
-        // Share the campaign object so anyone can donate.
         transfer::share_object(campaign);
     }
 
     public entry fun donate(
-        user_profile: &mut UserProfile,
+        profiles: &mut Profiles,
         campaign: &mut DonationCampaign,
         donation: Coin<SUI>,
         message: String,
@@ -171,11 +166,12 @@ module donation_system::donation {
 
         balance::join(&mut campaign.vault, coin::into_balance(donation));
 
-        // Mint and transfer NFT to donor
+        let sender = tx_context::sender(ctx);
+
         let nft = DonationNFT {
             id: object::new(ctx),
             campaign_id: object::id(campaign),
-            donor_address: tx_context::sender(ctx),
+            donor_address: sender,
             amount_donated: amount,
             timestamp_ms: clock::timestamp_ms(clock),
             campaign_name: campaign.name,
@@ -185,9 +181,15 @@ module donation_system::donation {
             nft_id: object::id(&nft)
         };
 
-        vector::push_back(&mut user_profile.nfts, nft_id);
+        if (!table::contains(&profiles.profiles, sender)) {
+            let user_profile = UserProfile { nfts: vector[nft_id] };
+            table::add(&mut profiles.profiles, sender, user_profile);
+        } else {
+            let user_profile = table::borrow_mut(&mut profiles.profiles, sender);
+            vector::push_back(&mut user_profile.nfts, nft_id);
+        };
 
-        transfer::public_transfer(nft, tx_context::sender(ctx));
+        transfer::public_transfer(nft, sender);
 
         event::emit(Donated {
             campaign_id: object::id(campaign),
@@ -218,6 +220,15 @@ module donation_system::donation {
     }
 
     // === Getter Functions ===
+
+    public fun get_user_nfts(profiles: &Profiles, user: address): vector<NftId> {
+        if (table::contains(&profiles.profiles, user)) {
+            let user_profile = table::borrow(&profiles.profiles, user);
+            user_profile.nfts
+        } else {
+            vector[]
+        }
+    }
 
     public fun donated_amount(campaign: &DonationCampaign): u64 {
         campaign.donated_amount

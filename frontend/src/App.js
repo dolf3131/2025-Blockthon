@@ -65,6 +65,7 @@ function App() {
   const [donationMessages, setDonationMessages] = useState({});
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [profilesId, setProfilesId] = useState("PROFILES_OBJECT_ID"); // TODO: Replace with actual Profiles object ID
 
   // State for the NFT modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,6 +186,7 @@ function App() {
     txb.moveCall({
       target: `${PACKAGE_ID}::donation::donate`,
       arguments: [
+          txb.object(profilesId),
           txb.object(campaignId),
           splitCoin,
           txb.pure.string(message),
@@ -298,7 +300,7 @@ function App() {
                 isLoading={isLoading}
                 isError={isError}
               />} />
-              <Route path="/profile" element={<Profile client={client} />} />
+              <Route path="/profile" element={<Profile client={client} profilesId={profilesId} />} />
             </Routes>
           ) : (
             <p>Please connect your wallet to continue.</p>

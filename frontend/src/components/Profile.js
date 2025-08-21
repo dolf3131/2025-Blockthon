@@ -1,82 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
-const Profile = ({ client }) => {
+const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
-    const { mutate: signAndExecute } = useSignAndExecuteTransaction();
     const [nfts, setNfts] = useState([]);
-    const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const getProfile = async () => {
-        if (!account || !client) return;
+    const getProfileNfts = async () => {
+        if (!account || !client || !profilesId) return;
         setLoading(true);
         try {
-            const ownedObjects = await client.getOwnedObjects({
-                owner: account.address,
-                filter: {
-                    StructType: `0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84::donation_system::UserProfile`
-                },
-                options: {
-                    showContent: true,
-                }
+            const tx = new Transaction();
+            tx.moveCall({
+                target: `${'0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84'}::donation::get_user_nfts`,
+                arguments: [tx.object(profilesId), tx.pure(account.address)],
             });
 
-            if (ownedObjects.data.length > 0) {
-                const profileObject = ownedObjects.data[0];
-                setProfile(profileObject);
-                const nftIds = profileObject.data.content.fields.nfts;
+            const res = await client.devInspectTransactionBlock({
+                sender: account.address,
+                transactionBlock: tx,
+            });
+
+            if (res.results && res.results[0]) {
+                const nftIds = res.results[0].returnValues[0][0].map(item => item[1]);
+
                 if (nftIds.length > 0) {
                     const nftObjects = await client.multiGetObjects({
-                        ids: nftIds.map(nft => nft.fields.nft_id),
+                        ids: nftIds,
                         options: {
                             showContent: true,
                         }
                     });
                     setNfts(nftObjects);
+                } else {
+                    setNfts([]);
                 }
-            } else {
-                setProfile(null);
-                setNfts([]);
             }
         } catch (error) {
-            console.error('Error fetching profile:', error);
+            console.error('Error fetching profile nfts:', error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        getProfile();
-    }, [account, client]);
+        getProfileNfts();
+    }, [account, client, profilesId]);
 
-    const createProfile = () => {
-        if (!account) return;
-        const txb = new Transaction();
-        txb.setGasBudget(10000000); // Set a gas budget
-        txb.moveCall({
-            target: `0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84::donation_system::create_user_profile`,
-            arguments: [],
-        });
-
-        signAndExecute(
-            {
-                transaction: txb,
-            },
-            {
-                onSuccess: (result) => {
-                    console.log('Profile created successfully', result);
-                    alert('Profile created successfully! Please refresh the page.');
-                    getProfile();
-                },
-                onError: (error) => {
-                    console.error('Error creating profile:', error);
-                    alert('Error creating profile.');
-                },
-            }
-        );
-    };
 
     if (!account) {
         return <div>Please connect your wallet to view your profile.</div>;
@@ -84,15 +55,6 @@ const Profile = ({ client }) => {
 
     if (loading) {
         return <div>Loading profile...</div>;
-    }
-
-    if (!profile) {
-        return (
-            <div>
-                <p>No profile found for your address.</p>
-                <button onClick={createProfile}>Create Profile</button>
-            </div>
-        );
     }
 
     return (
