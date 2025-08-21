@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
-import * as MystenBcs from '@mysten/bcs';
+import { bcs } from '@mysten/bcs';
 import { getSuiMoveConfig } from '@mysten/sui/client';
 
 const Profile = ({ client, profilesId }) => {
@@ -30,7 +30,7 @@ const Profile = ({ client, profilesId }) => {
             if (res.results && res.results[0]) {
                 const rawBytes = res.results[0].returnValues[0][0];
                 // Use BCS to deserialize the vector<address>
-                const bcs = new MystenBcs.BCS(getSuiMoveConfig()); // Initialize BCS with Sui Move config
+                
                 bcs.registerAddressType('address', 32, 'hex'); // Register address type
                 const nftIds = bcs.de('vector<address>', rawBytes);
 
