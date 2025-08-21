@@ -54,6 +54,7 @@ const Profile = ({ client }) => {
     const createProfile = () => {
         if (!account) return;
         const txb = new Transaction();
+        txb.setGasBudget(10000000); // Set a gas budget
         txb.moveCall({
             target: `0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84::donation_system::create_user_profile`,
             arguments: [],
@@ -62,9 +63,6 @@ const Profile = ({ client }) => {
         signAndExecute(
             {
                 transaction: txb,
-                options: {
-                    showEffects: true,
-                },
             },
             {
                 onSuccess: (result) => {
