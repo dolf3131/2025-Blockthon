@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
-import { JsonRpcProvider, Connection } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 
-const Profile = () => {
+const Profile = ({ client }) => {
     const account = useCurrentAccount();
     const { mutate: signAndExecute } = useSignAndExecuteTransaction();
     const [nfts, setNfts] = useState([]);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const provider = new JsonRpcProvider(new Connection({ fullnode: 'https://fullnode.devnet.sui.io:443' }));
-
     const getProfile = async () => {
-        if (!account) return;
+        if (!account || !client) return;
         setLoading(true);
         try {
-            const ownedObjects = await provider.getOwnedObjects({
+            const ownedObjects = await client.getOwnedObjects({
                 owner: account.address,
                 filter: {
                     StructType: `0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84::donation_system::UserProfile`
@@ -31,7 +28,7 @@ const Profile = () => {
                 setProfile(profileObject);
                 const nftIds = profileObject.data.content.fields.nfts;
                 if (nftIds.length > 0) {
-                    const nftObjects = await provider.multiGetObjects({
+                    const nftObjects = await client.multiGetObjects({
                         ids: nftIds.map(nft => nft.fields.nft_id),
                         options: {
                             showContent: true,
@@ -52,7 +49,7 @@ const Profile = () => {
 
     useEffect(() => {
         getProfile();
-    }, [account]);
+    }, [account, client]);
 
     const createProfile = () => {
         if (!account) return;

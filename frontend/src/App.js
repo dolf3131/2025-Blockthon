@@ -298,7 +298,7 @@ function App() {
                 isLoading={isLoading}
                 isError={isError}
               />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile" element={<Profile client={client} />} />
             </Routes>
           ) : (
             <p>Please connect your wallet to continue.</p>
