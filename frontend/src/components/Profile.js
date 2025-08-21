@@ -23,7 +23,7 @@ const Profile = ({ client, profilesId }) => {
                 transactionBlock: tx,
             });
 
-            console.log(JSON.stringify(res, null, 2));
+            console.log('DevInspect Result:', JSON.stringify(res, null, 2));
 
             if (res.results && res.results[0]) {
                 const rawBytes = res.results[0].returnValues[0][0];
