@@ -102,6 +102,8 @@ body {
   background-color: #0056b3;
 }
 
+/* Existing styles */
+
 .campaign-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -109,248 +111,26 @@ body {
   margin-top: 30px;
 }
 
-.campaign-card.card {
-  padding: 25px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-
-.campaign-card.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.campaign-card.card h4 {
-  margin-top: 0;
-  color: #007bff;
-  font-size: 1.3em;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
-
-.campaign-card.card h4 .status-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-left: 12px;
-  display: inline-block;
-}
-
-.campaign-card.card p {
-  margin: 8px 0;
-  color: #495057;
-  line-height: 1.6;
-}
-
-.campaign-card.card hr {
-  border: none;
-  border-top: 1px solid #e9ecef;
-  margin: 20px 0;
-}
-
-.campaign-card.card .button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.campaign-card.card .button-group input {
-  flex-grow: 1;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 0.95em;
-}
-
-.campaign-card.card .button-group button {
-  background-color: #28a745;
-  color: white;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95em;
-  transition: background-color 0.2s;
-}
-
-.campaign-card.card .button-group button:hover {
-  background-color: #218838;
-}
-
-.campaign-card.card .button-group button:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
-}
-
-.campaign-card.card .withdraw-btn {
-  background-color: #dc3545;
-}
-
-.campaign-card.card .withdraw-btn:hover {
-  background-color: #c82333;
-}
-
-.campaign-card.card h4 .status-indicator.in-progress {
-  background-color: #28a745;
-}
-
-.campaign-card.card h4 .status-indicator.closed {
-  background-color: #dc3545;
-}
-
-.campaign-detail.card {
-  padding: 40px;
-  margin-top: 30px;
-}
-
-.campaign-detail.card h3 {
-  color: #007bff;
-  font-size: 2em;
-  font-weight: 700;
-  margin-top: 0;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-}
-
-.campaign-detail.card h3 .status-indicator {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  margin-left: 20px;
-}
-
-.campaign-detail.card p {
-  margin: 10px 0;
-  color: #343a40;
-  font-size: 1.1em;
-  line-height: 1.7;
-}
-
-.campaign-detail.card .back-button {
-  background-color: #6c757d;
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1em;
-  margin-top: 30px;
-  transition: background-color 0.2s;
-}
-
-.campaign-detail.card .back-button:hover {
-  background-color: #5a6268;
-}
-
-.profile-page .card {
-  margin-top: 30px;
-}
-
-.profile-page h2 {
-    font-weight: 700;
-    color: #343a40;
-}
-
-.profile-page .nft-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-}
-
-.nft-card-profile {
+.campaign-card-profile {
     background-color: #fff;
     border: 1px solid #dee2e6;
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    text-align: center;
+    text-align: left; /* Align text to left for campaign details */
 }
 
-.nft-card-profile h4 {
+.campaign-card-profile h4 {
     margin-top: 0;
     color: #007bff;
     font-size: 1.2em;
     font-weight: 600;
 }
 
-.nft-card-profile p {
+.campaign-card-profile p {
     margin: 8px 0;
     color: #495057;
 }
 
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 40px;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  position: relative;
-}
-
-.modal-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: #adb5bd;
-}
-
-.modal-close:hover {
-  color: #495057;
-}
-
-.nft-card {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.nft-image {
-  width: 100%;
-  max-width: 300px;
-  height: auto;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  border: 1px solid #e9ecef;
-}
-
-.message-item {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-.message-item p {
-  margin: 5px 0;
-}
-
-.message-item .timestamp {
-  font-size: 0.85em;
-  color: #6c757d;
-  text-align: right;
-}
+/* ... rest of the file ... */
 
