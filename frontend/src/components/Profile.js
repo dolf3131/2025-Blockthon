@@ -41,6 +41,7 @@ const Profile = ({ client, profilesId }) => {
                             showContent: true,
                         }
                     });
+                    console.log('Fetched NFT Objects:', nftObjects);
                     setNfts(nftObjects);
                 } else {
                     setNfts([]);
