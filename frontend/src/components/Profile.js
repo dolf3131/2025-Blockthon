@@ -16,7 +16,7 @@ const Profile = ({ client, profilesId }) => {
             const tx = new Transaction();
             tx.moveCall({
                 target: `${PACKAGE_ID}::donation::get_user_nfts`,
-                arguments: [tx.object(profilesId), tx.pure(account.address)],
+                arguments: [tx.object(profilesId), tx.pure.address(account.address)],
             });
 
             const res = await client.devInspectTransactionBlock({
