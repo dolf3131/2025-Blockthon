@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
-
+import { Bcs, getSuiMoveConfig } from '@mysten/sui/bcs';
 import { PACKAGE_ID } from '../config';
+
+const SUI_BCS_CONFIG = getSuiMoveConfig();
+
+SUI_BCS_CONFIG.registerStructType("NftId", {
+    nft_id: "address",
+});
+
+SUI_BCS_CONFIG.registerStructType("UserProfile", {
+    nfts: "vector<NftId>",
+});
 
 const Profile = ({ client, profilesId }) => {
     const account = useCurrentAccount();
@@ -27,7 +37,9 @@ const Profile = ({ client, profilesId }) => {
             console.log(JSON.stringify(res, null, 2));
 
             if (res.results && res.results[0]) {
-                const nftIds = res.results[0].returnValues[0][0].map(item => item[1]);
+                const bcs = new Bcs(SUI_BCS_CONFIG);
+                const deserializedNfts = bcs.de("vector<NftId>", res.results[0].returnValues[0][0]);
+                const nftIds = deserializedNfts.map(nft => nft.nft_id);
 
                 if (nftIds.length > 0) {
                     const nftObjects = await client.multiGetObjects({
