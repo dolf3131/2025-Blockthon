@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useWallet } from '@suiet/wallet-kit';
-import { JsonRpcProvider, Connection } from '@mysten/sui.js/client';
+import { useCurrentAccount, useSignAndExecuteTransactionBlock } from '@mysten/dapp-kit';
+import { JsonRpcProvider, Connection } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 
 const Profile = () => {
-    const wallet = useWallet();
+    const account = useCurrentAccount();
+    const { mutate: signAndExecute } = useSignAndExecuteTransactionBlock();
     const [nfts, setNfts] = useState([]);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -12,11 +13,11 @@ const Profile = () => {
     const provider = new JsonRpcProvider(new Connection({ fullnode: 'https://fullnode.devnet.sui.io:443' }));
 
     const getProfile = async () => {
-        if (!wallet.account) return;
+        if (!account) return;
         setLoading(true);
         try {
             const ownedObjects = await provider.getOwnedObjects({
-                owner: wallet.account.address,
+                owner: account.address,
                 filter: {
                     StructType: `0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84::donation_system::UserProfile`
                 },
@@ -51,29 +52,35 @@ const Profile = () => {
 
     useEffect(() => {
         getProfile();
-    }, [wallet.account]);
+    }, [account]);
 
     const createProfile = async () => {
-        if (!wallet.account) return;
+        if (!account) return;
         const txb = new Transaction();
         txb.moveCall({
             target: `0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84::donation_system::create_user_profile`,
             arguments: [],
         });
 
-        try {
-            await wallet.signAndExecuteTransactionBlock({
-                transactionBlock: txb,
-            });
-            alert('Profile created successfully! Please refresh the page.');
-            getProfile();
-        } catch (error) {
-            console.error('Error creating profile:', error);
-            alert('Error creating profile.');
-        }
+        signAndExecute(
+            {
+                transaction: txb,
+            },
+            {
+                onSuccess: (result) => {
+                    console.log('Profile created successfully', result);
+                    alert('Profile created successfully! Please refresh the page.');
+                    getProfile();
+                },
+                onError: (error) => {
+                    console.error('Error creating profile:', error);
+                    alert('Error creating profile.');
+                },
+            }
+        );
     };
 
-    if (!wallet.account) {
+    if (!account) {
         return <div>Please connect your wallet to view your profile.</div>;
     }
 
@@ -93,7 +100,7 @@ const Profile = () => {
     return (
         <div>
             <h2>User Profile</h2>
-            <p><strong>Address:</strong> {wallet.account.address}</p>
+            <p><strong>Address:</strong> {account.address}</p>
             <h3>My NFTs</h3>
             <div className="nft-list">
                 {nfts.length > 0 ? (
