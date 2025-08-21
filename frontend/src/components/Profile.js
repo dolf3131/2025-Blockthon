@@ -165,6 +165,7 @@ const Profile = ({ client, profilesId }) => {
                         return (
                             <div key={nft.data.objectId} className="nft-card-profile">
                                 <img src={imageUrl} alt="NFT Identicon" className="nft-image-small" />
+                                <a href={imageUrl} download={`${nft.data.content.fields.campaign_name}_${nft.data.objectId}.svg`}>Download Image</a>
                                 <h4>{nft.data.content.fields.campaign_name}</h4>
                                 <p>Amount Funded: {(Number(nft.data.content.fields.amount_donated) / 1_000_000_000).toFixed(3)} SUI</p>
                                 <p>Donation Time: {donationTime}</p>
