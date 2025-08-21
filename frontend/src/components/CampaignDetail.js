@@ -41,27 +41,24 @@ const CampaignDetail = ({
 
     const filteredEvents = donatedEventData.data.filter(event => event.parsedJson.campaign_id === campaign.data.objectId);
 
-    const newGroupedMessages = {};
+    const newMessages = [];
     filteredEvents.forEach(event => {
       const sender = event.sender;
       const timestamp = new Date(parseInt(event.timestampMs)).toLocaleString();
       const message = event.parsedJson.message;
       const amount = event.parsedJson.amount;
-
-      if (!newGroupedMessages[sender]) {
-        newGroupedMessages[sender] = {
-          sender: sender,
-          messages: [],
-        };
-      }
-      newGroupedMessages[sender].messages.push({ timestamp, message, amount });
+      newMessages.push({ sender, timestamp, message, amount });
     });
 
-    for (const sender in newGroupedMessages) {
-      newGroupedMessages[sender].messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    }
+    newMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
 
-    setGroupedMessages(newGroupedMessages);
+    setGroupedMessages(newMessages.reduce((acc, msg) => {
+        if (!acc[msg.sender]) {
+            acc[msg.sender] = { sender: msg.sender, messages: [] };
+        }
+        acc[msg.sender].messages.push(msg);
+        return acc;
+    }, {}));
   }, [donatedEventData, campaign.data.objectId]);
 
   return (
@@ -80,11 +77,11 @@ const CampaignDetail = ({
 
       <hr />
 
-      <h4>Donate to this Campaign</h4>
+      <h4>Fund this Campaign</h4>
       <div className="button-group">
         <input 
           type="number" 
-          placeholder="Amount to donate (in SUI)"
+          placeholder="Amount to fund (in SUI)"
           value={donationAmounts[campaign.data.objectId] || ''}
           onChange={(e) => handleAmountChange(campaign.data.objectId, e.target.value)}
         />
@@ -95,7 +92,7 @@ const CampaignDetail = ({
           onChange={(e) => setDonationMessages(prev => ({ ...prev, [campaign.data.objectId]: e.target.value }))}
         />
         <button onClick={() => donate(campaign.data.objectId, parseFloat(donationAmounts[campaign.data.objectId]) * 1_000_000_000, donationMessages[campaign.data.objectId] || '')}
-                disabled={!campaign.data.content.fields.active}>Donate</button>
+                disabled={!campaign.data.content.fields.active}>Fund</button>
       </div>
 
       {account.address === campaign.data.content.fields.beneficiary && campaign.data.content.fields.active && (
@@ -105,20 +102,16 @@ const CampaignDetail = ({
       )}
 
       <div className="message-list">
-        <h4>Donor Messages</h4>
+        <h4>Funder Messages</h4>
         {isLoadingDonatedEvents && <p>Loading messages...</p>}
         {isErrorDonatedEvents && <p>Error loading messages.</p>}
-        {Object.keys(groupedMessages).length > 0 ? (
-          Object.keys(groupedMessages).map((sender) => (
-            <div key={sender} className="message-group">
-              <p><span className="sender">From: {groupedMessages[sender].sender.slice(0, 6)}...{groupedMessages[sender].sender.slice(-4)}</span></p>
-              {groupedMessages[sender].messages.map((msg, msgIndex) => (
-                <div key={msgIndex} className="message-item">
-                  <p>Amount: {formatSui(msg.amount)}</p>
-                  <p>Message: {msg.message}</p>
-                  <p className="timestamp">{msg.timestamp}</p>
-                </div>
-              ))}
+        {Object.values(groupedMessages).flatMap(group => group.messages).length > 0 ? (
+          Object.values(groupedMessages).flatMap(group => group.messages).map((msg, msgIndex) => (
+            <div key={msgIndex} className="message-item">
+              <p><strong>From:</strong> {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}</p>
+              <p><strong>Amount:</strong> {formatSui(msg.amount)}</p>
+              <p><strong>Message:</strong> {msg.message}</p>
+              <p className="timestamp">{msg.timestamp}</p>
             </div>
           ))
         ) : (

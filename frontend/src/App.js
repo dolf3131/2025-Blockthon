@@ -217,7 +217,7 @@ function App() {
         });
       } else {
         // Fallback alert if NFT is not found in effects for any reason
-        alert('Donation successful! A commemorative NFT has been sent to your wallet.');
+        alert('Funding successful! A commemorative NFT has been sent to your wallet.');
       }
 
       // After successful donation, refetch the specific campaign object
@@ -262,7 +262,7 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <h1>Sui Donation dApp</h1>
+          <h1>Sui Crowdfunding dApp</h1>
           <nav>
             <Link to="/">Home</Link>
             <Link to="/profile">My Profile</Link>

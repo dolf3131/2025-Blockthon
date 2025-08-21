@@ -24,6 +24,8 @@ const Profile = ({ client, profilesId }) => {
                 transactionBlock: tx,
             });
 
+            console.log(JSON.stringify(res, null, 2));
+
             if (res.results && res.results[0]) {
                 const nftIds = res.results[0].returnValues[0][0].map(item => item[1]);
 
@@ -72,7 +74,7 @@ const Profile = ({ client, profilesId }) => {
                     nfts.map(nft => (
                         <div key={nft.data.objectId} className="nft-card-profile">
                             <h4>{nft.data.content.fields.campaign_name}</h4>
-                            <p>Amount Donated: {nft.data.content.fields.amount_donated} SUI</p>
+                            <p>Amount Funded: {nft.data.content.fields.amount_donated} SUI</p>
                         </div>
                     ))
                 ) : (
