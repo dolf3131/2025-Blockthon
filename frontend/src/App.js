@@ -1,14 +1,55 @@
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient, useSuiClientQuery } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 
 import CreateCampaignForm from './components/CreateCampaignForm';
 import CampaignList from './components/CampaignList';
 import CampaignDetail from './components/CampaignDetail';
 import NftModal from './components/NftModal'; // Import the modal component
+import Profile from './components/Profile';
 
 const PACKAGE_ID = "0x58d13c3315659e0448a051d57dc5794e68f00c3c09a8092dad42dc8c9f5f6f84";
+
+function Home({ account, client, signAndExecute, campaigns, selectedCampaign, setSelectedCampaign, donationAmounts, handleAmountChange, donationMessages, setDonationMessages, donate, withdraw, formatSui, name, setName, description, setDescription, organizerName, setOrganizerName, goal, setGoal, duration, setDuration, createCampaign, isLoading, isError }) {
+  return (
+    <div>
+      <h2>Welcome, {account.address.slice(0, 6)}...{account.address.slice(-4)}</h2>
+      
+      {!selectedCampaign ? (
+        <>
+          <CreateCampaignForm 
+            name={name} setName={setName}
+            description={description} setDescription={setDescription}
+            organizerName={organizerName} setOrganizerName={setOrganizerName}
+            goal={goal} setGoal={setGoal}
+            duration={duration} setDuration={setDuration}
+            createCampaign={createCampaign}
+          />
+
+          <CampaignList 
+            isLoading={isLoading} isError={isError} campaigns={campaigns}
+            setSelectedCampaign={setSelectedCampaign}
+            donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
+            donationMessages={donationMessages} setDonationMessages={setDonationMessages}
+            donate={donate} account={account} withdraw={withdraw}
+            formatSui={formatSui}
+          />
+        </>
+      ) : (
+        <CampaignDetail 
+          campaign={selectedCampaign} setSelectedCampaign={setSelectedCampaign}
+          account={account} donate={donate} withdraw={withdraw}
+          donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
+          donationMessages={donationMessages} setDonationMessages={setDonationMessages}
+          PACKAGE_ID={PACKAGE_ID}
+          formatSui={formatSui}
+        />
+      )}
+    </div>
+  );
+}
 
 function App() {
   const account = useCurrentAccount();
@@ -216,59 +257,62 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Sui Donation dApp</h1>
-        <ConnectButton />
-      </header>
-      <main>
-        {account ? (
-          <div>
-            <h2>Welcome, {account.address.slice(0, 6)}...{account.address.slice(-4)}</h2>
-            
-            {!selectedCampaign ? (
-              <>
-                <CreateCampaignForm 
-                  name={name} setName={setName}
-                  description={description} setDescription={setDescription}
-                  organizerName={organizerName} setOrganizerName={setOrganizerName}
-                  goal={goal} setGoal={setGoal}
-                  duration={duration} setDuration={setDuration}
-                  createCampaign={createCampaign}
-                />
-
-                <CampaignList 
-                  isLoading={isLoading} isError={isError} campaigns={campaigns}
-                  setSelectedCampaign={setSelectedCampaign}
-                  donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
-                  donationMessages={donationMessages} setDonationMessages={setDonationMessages}
-                  donate={donate} account={account} withdraw={withdraw}
-                  formatSui={formatSui}
-                />
-              </>
-            ) : (
-              <CampaignDetail 
-                campaign={selectedCampaign} setSelectedCampaign={setSelectedCampaign}
-                account={account} donate={donate} withdraw={withdraw}
-                donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
-                donationMessages={donationMessages} setDonationMessages={setDonationMessages}
-                PACKAGE_ID={PACKAGE_ID}
+    <Router>
+      <div className="App">
+        <header className="App-header">
+          <h1>Sui Donation dApp</h1>
+          <nav>
+            <Link to="/">Home</Link>
+            <Link to="/profile">My Profile</Link>
+          </nav>
+          <ConnectButton />
+        </header>
+        <main>
+          {account ? (
+            <Routes>
+              <Route path="/" element={<Home 
+                account={account}
+                client={client}
+                signAndExecute={signAndExecute}
+                campaigns={campaigns}
+                selectedCampaign={selectedCampaign}
+                setSelectedCampaign={setSelectedCampaign}
+                donationAmounts={donationAmounts}
+                handleAmountChange={handleAmountChange}
+                donationMessages={donationMessages}
+                setDonationMessages={setDonationMessages}
+                donate={donate}
+                withdraw={withdraw}
                 formatSui={formatSui}
-              />
-            )}
-          </div>
-        ) : (
-          <p>Please connect your wallet to continue.</p>
-        )}
-      </main>
+                name={name}
+                setName={setName}
+                description={description}
+                setDescription={setDescription}
+                organizerName={organizerName}
+                setOrganizerName={setOrganizerName}
+                goal={goal}
+                setGoal={setGoal}
+                duration={duration}
+                setDuration={setDuration}
+                createCampaign={createCampaign}
+                isLoading={isLoading}
+                isError={isError}
+              />} />
+              <Route path="/profile" element={<Profile />} />
+            </Routes>
+          ) : (
+            <p>Please connect your wallet to continue.</p>
+          )}
+        </main>
 
-      {isModalOpen && modalNft && (
-        <NftModal
-          nft={modalNft}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
-    </div>
+        {isModalOpen && modalNft && (
+          <NftModal
+            nft={modalNft}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
+      </div>
+    </Router>
   );
 }
 

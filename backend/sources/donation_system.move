@@ -40,6 +40,16 @@ module donation_system::donation {
         campaign_name: String,
     }
 
+    public struct NftId has store, copy, drop {
+        nft_id: ID,
+    }
+
+    public struct UserProfile has key, store {
+        id: UID,
+        owner: address,
+        nfts: vector<NftId>,
+    }
+
     // Define the One-Time Witness struct
     public struct DONATION has drop {}
 
@@ -95,6 +105,19 @@ module donation_system::donation {
         amount: u64,
     }
 
+    public entry fun create_user_profile(ctx: &mut TxContext) {
+        let profile = UserProfile {
+            id: object::new(ctx),
+            owner: tx_context::sender(ctx),
+            nfts: vector[],
+        };
+        transfer::transfer(profile, tx_context::sender(ctx));
+    }
+
+    public fun get_user_nfts(profile: &UserProfile): vector<NftId> {
+        profile.nfts
+    }
+
     // === Public Functions ===
     public entry fun create_campaign(
         name: String,
@@ -133,11 +156,12 @@ module donation_system::donation {
     }
 
     public entry fun donate(
+        user_profile: &mut UserProfile,
         campaign: &mut DonationCampaign,
         donation: Coin<SUI>,
         message: String,
         clock: &Clock,
-        ctx: &mut TxContext // Changed _ctx to ctx
+        ctx: &mut TxContext
     ) {
         assert!(campaign.active, ECampaignInactive);
         assert!(clock::timestamp_ms(clock) < campaign.deadline, ECampaignFinished);
@@ -156,6 +180,13 @@ module donation_system::donation {
             timestamp_ms: clock::timestamp_ms(clock),
             campaign_name: campaign.name,
         };
+
+        let nft_id = NftId {
+            nft_id: object::id(&nft)
+        };
+
+        vector::push_back(&mut user_profile.nfts, nft_id);
+
         transfer::public_transfer(nft, tx_context::sender(ctx));
 
         event::emit(Donated {
