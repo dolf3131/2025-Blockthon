@@ -1,17 +1,21 @@
-
-.campaign-actions-and-reports-container {
-  display: flex;
+.top-sections-grid,
+.bottom-sections-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 25px;
   align-items: flex-start;
+  margin-bottom: 30px;
   flex-wrap: wrap;
 }
 
-.fund-campaign-section {
-  flex: 1;
-  min-width: 300px;
+@media (max-width: 768px) {
+  .top-sections-grid,
+  .bottom-sections-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.fund-usage-report-section {
-  flex: 1;
-  min-width: 300px;
+.top-sections-grid > div,
+.bottom-sections-grid > div {
+  width: 100%;
 }

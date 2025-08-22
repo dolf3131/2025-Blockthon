@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
-import FundUsageReportSection from './FundUsageReportSection';
+import FundUsageReportSection from './FundUsageReportSection'; // This is now list-only
+import SubmitReportForm from './SubmitReportForm'; // New import for the form
 import OrganizerTrustScore from './OrganizerTrustScore';
 
 const CampaignDetail = ({
@@ -36,6 +37,19 @@ const CampaignDetail = ({
     },
     { enabled: !!campaign.data.objectId }
   );
+
+  // Refetch function for FundUsageReportSection (list part)
+  const { refetch: refetchFundUsageReports } = useSuiClientQuery(
+    'queryEvents',
+    {
+      query: {
+        MoveEventType: `${PACKAGE_ID}::donation::FundUsageReported`,
+      },
+      order: 'descending',
+    },
+    { enabled: !!campaign.data.objectId }
+  );
+
 
   useEffect(() => {
     if (!donatedEventData || !donatedEventData.data) {
@@ -81,8 +95,8 @@ const CampaignDetail = ({
 
       <hr />
 
-      <div className="campaign-actions-and-reports-container"> {/* New container for flexbox */}
-        <div className="fund-campaign-section">
+      <div className="top-sections-grid"> {/* New grid container for top two sections */}
+        <div className="fund-campaign-section card"> {/* Added card class here */}
           <h4>Fund this Campaign</h4>
           <div className="button-group">
             <input 
@@ -108,36 +122,41 @@ const CampaignDetail = ({
           )}
         </div>
 
-        <FundUsageReportSection
+        <SubmitReportForm
           campaign={campaign}
           account={account}
           PACKAGE_ID={PACKAGE_ID}
-          formatSui={formatSui}
           signAndExecute={signAndExecute}
           profilesId={profilesId}
+          refetchFundUsageReports={refetchFundUsageReports} // Pass refetch function
         />
       </div>
 
-      <div className="content-sections">
-        <div className="section-container">
-          <div className="message-list">
-            <h4>Funder Messages</h4>
-            {isLoadingDonatedEvents && <p>Loading messages...</p>}
-            {isErrorDonatedEvents && <p>Error loading messages.</p>}
-            {Object.values(groupedMessages).flatMap(group => group.messages).length > 0 ? (
-              Object.values(groupedMessages).flatMap(group => group.messages).map((msg, msgIndex) => (
-                <div key={msgIndex} className="message-item card">
-                  <p><strong>From:</strong> {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}</p>
-                  <p><strong>Amount:</strong> {formatSui(msg.amount)}</p>
-                  <p><strong>Message:</strong> {msg.message}</p>
-                  <p className="timestamp">{msg.timestamp}</p>
-                </div>
-              ))
-            ) : (
-              !isLoadingDonatedEvents && <p>No messages yet.</p>
-            )}
-          </div>
+      <div className="bottom-sections-grid"> {/* New grid container for bottom two sections */}
+        <div className="message-list card"> {/* Added card class here */}
+          <h4>Funder Messages</h4>
+          {isLoadingDonatedEvents && <p>Loading messages...</p>}
+          {isErrorDonatedEvents && <p>Error loading messages.</p>}
+          {Object.values(groupedMessages).flatMap(group => group.messages).length > 0 ? (
+            Object.values(groupedMessages).flatMap(group => group.messages).map((msg, msgIndex) => (
+              <div key={msgIndex} className="message-item card">
+                <p><strong>From:</strong> {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}</p>
+                <p><strong>Amount:</strong> {formatSui(msg.amount)}</p>
+                <p><strong>Message:</strong> {msg.message}</p>
+                <p className="timestamp">{msg.timestamp}</p>
+              </div>
+            ))
+          ) : (
+            !isLoadingDonatedEvents && <p>No messages yet.</p>
+          )}
         </div>
+
+        <FundUsageReportSection
+          campaign={campaign}
+          PACKAGE_ID={PACKAGE_ID}
+          formatSui={formatSui}
+          // No need to pass account, signAndExecute, profilesId, refetchFundUsageReports here anymore
+        />
       </div>
     </div>
   );
