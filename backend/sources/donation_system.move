@@ -18,6 +18,9 @@ module donation_system::donation {
     const EGoalNotMet: u64 = 2;
     const ECampaignFinished: u64 = 3;
 
+    const PLATFORM_FEE_PERCENTAGE: u64 = 5;
+    const PLATFORM_FEE_ADDRESS: address = @0xe2dde3ab1bfacae12b027588e0bd546eb1a295a80e993c9fbaed909318ecfdcd; // Placeholder for platform's address
+
     // === Objects ===
     public struct DonationCampaign has key, store {
         id: UID,
@@ -235,10 +238,14 @@ module donation_system::donation {
         assert!(campaign.donated_amount >= campaign.goal, EGoalNotMet);
 
         let total_amount = balance::value(&campaign.vault);
-        let new_balance = balance::split(&mut campaign.vault, total_amount);
-        let funds = coin::from_balance(new_balance, ctx);
-        
-        sui::transfer::public_transfer(funds, campaign.beneficiary);
+        let platform_fee_amount = total_amount * PLATFORM_FEE_PERCENTAGE / 100;
+        let beneficiary_amount = total_amount - platform_fee_amount;
+
+        let platform_funds = balance::split(&mut campaign.vault, platform_fee_amount);
+        let beneficiary_funds = balance::split(&mut campaign.vault, beneficiary_amount);
+
+        sui::transfer::public_transfer(coin::from_balance(platform_funds, ctx), PLATFORM_FEE_ADDRESS);
+        sui::transfer::public_transfer(coin::from_balance(beneficiary_funds, ctx), campaign.beneficiary);
 
         campaign.active = false;
 
