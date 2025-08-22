@@ -1,2 +1,2 @@
-export const PACKAGE_ID = "0x2"; // Replace with your actual package ID
-export const PROFILES_OBJECT_ID = "0x2"; // Replace with your actual Profiles object ID
+export const PACKAGE_ID = "0xd7d5d1652904a1ed98d9aa0b77ac5057ef722cb3310424ab92b55aa52c90a41e";
+export const PROFILES_OBJECT_ID = "0x4961afc80a535ccda5d36987a5fd241bd946de8f6d705371c8898cddb4689110";
