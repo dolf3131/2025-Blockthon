@@ -43,6 +43,13 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     text-align: left;
     margin-bottom: 20px; /* Add some space between campaign cards */
+    transition: transform 0.2s, box-shadow 0.2s; /* Add transition */
+    cursor: pointer; /* Add pointer cursor */
+}
+
+.campaign-card-profile:hover {
+    transform: translateY(-5px); /* Add hover effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Add hover effect */
 }
 
 .campaign-card-profile h4 {
