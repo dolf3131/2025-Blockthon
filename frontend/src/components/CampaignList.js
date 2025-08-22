@@ -47,7 +47,7 @@ const CampaignList = ({
               value={donationMessages[campaign.data.objectId] || ''}
               onChange={(e) => setDonationMessages(prev => ({ ...prev, [campaign.data.objectId]: e.target.value }))}
             />
-            <button onClick={() => donate(campaign.data.objectId, parseFloat(donationAmounts[campaign.data.objectId]) * 1_000_000_000, donationMessages[campaign.data.objectId] || '')}
+            <button onClick={() => donate(campaign.data.objectId, parseFloat(donationAmounts[campaign.data.objectId] || '0') * 1_000_000_000, donationMessages[campaign.data.objectId] || '')}
                     disabled={!campaign.data.content.fields.active}>Fund</button>
           </div>
 

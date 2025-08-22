@@ -52,7 +52,7 @@ const Home = ({
             setSelectedCampaign={setSelectedCampaign}
             donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
             donationMessages={donationMessages} setDonationMessages={setDonationMessages}
-            donate={(campaignId, amount, message) => donate(campaignId, amount, message, setModalNft, setIsModalOpen)}
+            donate={donate}
             account={account} 
             withdraw={withdraw}
             formatSui={formatSui}
@@ -63,7 +63,7 @@ const Home = ({
         <CampaignDetail 
           campaign={selectedCampaign} setSelectedCampaign={setSelectedCampaign}
           account={account} 
-          donate={(campaignId, amount, message) => donate(campaignId, amount, message, setModalNft, setIsModalOpen)}
+          donate={donate}
           withdraw={withdraw}
           donationAmounts={donationAmounts} handleAmountChange={handleAmountChange}
           donationMessages={donationMessages} setDonationMessages={setDonationMessages}

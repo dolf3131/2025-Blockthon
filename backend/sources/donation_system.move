@@ -240,7 +240,7 @@ module donation_system::donation_system {
             id: sui::object::new(ctx),
             donor: sender,
             name,
-            donation_history: vector[],
+            donation_history: vector[], 
         };
         transfer::transfer(profile, sender);
     }
