@@ -132,6 +132,7 @@ const CampaignDetail = ({
           PACKAGE_ID={PACKAGE_ID}
           formatSui={formatSui}
           signAndExecute={signAndExecute}
+          profilesId={profilesId} // Added
         />
       </div>
     </div>
