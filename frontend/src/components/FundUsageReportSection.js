@@ -34,6 +34,7 @@ const FundUsageReportSection = ({
     const txb = new Transaction();
     console.log("txb:", txb);
     console.log("txb.object:", txb.object);
+    console.log("profilesId:", profilesId);
     txb.moveCall({
       target: `${PACKAGE_ID}::donation::submit_fund_usage_report`,
       arguments: [
