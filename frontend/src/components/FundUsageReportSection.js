@@ -103,7 +103,7 @@ const FundUsageReportSection = ({
         {isErrorFundUsageReports && <p>Error loading fund usage reports.</p>}
         {fundUsageReportData && fundUsageReportData.data.length > 0 ? (
           fundUsageReportData.data.filter(event => event.parsedJson.campaign_id === campaign.data.objectId).map((report, index) => (
-            <div key={index} className="report-item">
+            <div key={index} className="report-item card">
               <h5>{report.parsedJson.report_title}</h5>
               <p><strong>Reporter:</strong> {report.parsedJson.reporter.slice(0, 6)}...{report.parsedJson.reporter.slice(-4)}</p>
               <p><strong>Description:</strong> {report.parsedJson.report_description}</p>
