@@ -154,6 +154,7 @@ function App() {
       txb.moveCall({
         target: `${PACKAGE_ID}::donation::create_campaign`,
         arguments: [
+            txb.object(PROFILES_OBJECT_ID),
             txb.pure.string(name),
             txb.pure.string(description),
             txb.pure.string(organizerName),
