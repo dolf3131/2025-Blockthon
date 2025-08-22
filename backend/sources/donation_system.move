@@ -11,6 +11,7 @@ module donation_system::donation {
     use sui::display;
     use sui::package;
     use sui::table::{Self, Table};
+    use donation_system::profile_helpers::{Self, Profiles};
 
     // === Errors ===
     const ENotCampaignOwner: u64 = 0;
@@ -44,20 +45,7 @@ module donation_system::donation {
         campaign_name: String,
     }
 
-    public struct NftId has store, copy, drop {
-        nft_id: ID,
-    }
-
-    public struct UserProfile has store {
-        nfts: vector<NftId>,
-        total_campaigns_created: u64,
-        successful_campaigns: u64,
-    }
-
-    public struct Profiles has key {
-        id: UID,
-        profiles: Table<address, UserProfile>,
-    }
+    
 
     // Define the One-Time Witness struct
     public struct DONATION has drop {}
@@ -92,10 +80,7 @@ module donation_system::donation {
         sui::transfer::public_share_object(display);
         package::burn_publisher(publisher);
 
-        sui::transfer::share_object(Profiles {
-            id: object::new(ctx),
-            profiles: table::new(ctx),
-        });
+        sui::transfer::public_share_object(profile_helpers::init_profiles(ctx));
     }
 
     // === Events ===
@@ -165,18 +150,7 @@ module donation_system::donation {
             deadline,
         });
 
-        // Add logic to update UserProfile
-        if (!table::contains(&profiles.profiles, beneficiary)) {
-            let user_profile = UserProfile {
-                nfts: vector[],
-                total_campaigns_created: 1,
-                successful_campaigns: 0
-            };
-            table::add(&mut profiles.profiles, beneficiary, user_profile);
-        } else {
-            let user_profile = table::borrow_mut(&mut profiles.profiles, beneficiary);
-            user_profile.total_campaigns_created = user_profile.total_campaigns_created + 1;
-        };
+        profile_helpers::increment_total_campaigns_created(profiles, beneficiary, ctx);
 
         sui::transfer::share_object(campaign);
     }
@@ -208,17 +182,8 @@ module donation_system::donation {
             campaign_name: campaign.name,
         };
 
-        let nft_id = NftId {
-            nft_id: object::id(&nft)
-        };
-
-        if (!table::contains(&profiles.profiles, sender)) {
-            let user_profile = UserProfile { nfts: vector[nft_id], total_campaigns_created: 0, successful_campaigns: 0 };
-            table::add(&mut profiles.profiles, sender, user_profile);
-        } else {
-            let user_profile = table::borrow_mut(&mut profiles.profiles, sender);
-            vector::push_back(&mut user_profile.nfts, nft_id);
-        };
+        let nft_id = profile_helpers::new_nft_id(object::id(&nft));
+        profile_helpers::add_nft_to_profile(profiles, sender, nft_id, ctx);
 
         sui::transfer::public_transfer(nft, sender);
 
@@ -249,9 +214,7 @@ module donation_system::donation {
 
         campaign.active = false;
 
-        // Add logic to update UserProfile
-        let user_profile = table::borrow_mut(&mut profiles.profiles, campaign.beneficiary);
-        user_profile.successful_campaigns = user_profile.successful_campaigns + 1;
+        profile_helpers::increment_successful_campaigns(profiles, campaign.beneficiary, ctx);
 
         event::emit(Withdrawn {
             campaign_id: object::id(campaign),
@@ -283,27 +246,6 @@ module donation_system::donation {
         });
     }
 
-    // === Getter Functions ===
-
-    public fun get_user_nfts(profiles_obj: &Profiles, user_address: address): vector<address> {
-        let mut user_profile_nfts = vector::empty<address>();
-
-        if (table::contains(&profiles_obj.profiles, user_address)) {
-            let user_profile = table::borrow(&profiles_obj.profiles, user_address);
-            let nfts_vec = &user_profile.nfts; // This is a vector<NftId>
-
-            let mut i = 0;
-            let len = vector::length(nfts_vec);
-            while (i < len) {
-                let nft_id_struct = vector::borrow(nfts_vec, i);
-                vector::push_back(&mut user_profile_nfts, object::id_to_address(&nft_id_struct.nft_id));
-                i = i + 1;
-            };
-        };
-
-        user_profile_nfts
-    }
-
     public fun donated_amount(campaign: &DonationCampaign): u64 {
         campaign.donated_amount
     }
@@ -320,12 +262,4 @@ module donation_system::donation {
         campaign.active
     }
 
-    public fun get_organizer_trust_score(profiles_obj: &Profiles, organizer_address: address): (u64, u64) {
-        if (table::contains(&profiles_obj.profiles, organizer_address)) {
-            let user_profile = table::borrow(&profiles_obj.profiles, organizer_address);
-            return (user_profile.successful_campaigns, user_profile.total_campaigns_created)
-        } else {
-            return (0, 0) // No campaigns created yet
-        }
-    }
 }
