@@ -214,7 +214,7 @@ module donation_system::donation {
 
         campaign.active = false;
 
-        profile_helpers::increment_successful_campaigns(profiles, campaign.beneficiary, ctx);
+        
 
         event::emit(Withdrawn {
             campaign_id: object::id(campaign),
@@ -223,6 +223,7 @@ module donation_system::donation {
     }
 
     public entry fun submit_fund_usage_report(
+        profiles: &mut Profiles,
         campaign: &mut DonationCampaign,
         report_title: String,
         report_description: String,
@@ -244,6 +245,8 @@ module donation_system::donation {
             proof_url,
             timestamp_ms: clock::timestamp_ms(clock),
         });
+
+        profile_helpers::increment_successful_campaigns(profiles, tx_context::sender(ctx), ctx);
     }
 
     public fun donated_amount(campaign: &DonationCampaign): u64 {

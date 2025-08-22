@@ -8,6 +8,7 @@ const FundUsageReportSection = ({
   PACKAGE_ID,
   formatSui,
   signAndExecute,
+  profilesId, // Added
 }) => {
   const [reportTitle, setReportTitle] = useState('');
   const [reportDescription, setReportDescription] = useState('');
@@ -34,6 +35,7 @@ const FundUsageReportSection = ({
     txb.moveCall({
       target: `${PACKAGE_ID}::donation::submit_fund_usage_report`,
       arguments: [
+        txb.object(profilesId),
         txb.object(campaign.data.objectId),
         txb.pure.string(reportTitle),
         txb.pure.string(reportDescription),
