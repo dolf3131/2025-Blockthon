@@ -81,29 +81,42 @@ const CampaignDetail = ({
 
       <hr />
 
-      <h4>Fund this Campaign</h4>
-      <div className="button-group">
-        <input 
-          type="number" 
-          placeholder="Amount to fund (in SUI)"
-          value={donationAmounts[campaign.data.objectId] || ''}
-          onChange={(e) => handleAmountChange(campaign.data.objectId, e.target.value)}
-        />
-        <input 
-          type="text" 
-          placeholder="Your message (optional)"
-          value={donationMessages[campaign.data.objectId] || ''}
-          onChange={(e) => setDonationMessages(prev => ({ ...prev, [campaign.data.objectId]: e.target.value }))}
-        />
-        <button onClick={() => donate(campaign.data.objectId, parseFloat(donationAmounts[campaign.data.objectId] || '0') * 1_000_000_000, donationMessages[campaign.data.objectId] || '')}
-                disabled={!campaign.data.content.fields.active}>Fund</button>
-      </div>
+      <div className="campaign-actions-and-reports-container"> {/* New container for flexbox */}
+        <div className="fund-campaign-section">
+          <h4>Fund this Campaign</h4>
+          <div className="button-group">
+            <input 
+              type="number" 
+              placeholder="Amount to fund (in SUI)"
+              value={donationAmounts[campaign.data.objectId] || ''}
+              onChange={(e) => handleAmountChange(campaign.data.objectId, e.target.value)}
+            />
+            <input 
+              type="text" 
+              placeholder="Your message (optional)"
+              value={donationMessages[campaign.data.objectId] || ''}
+              onChange={(e) => setDonationMessages(prev => ({ ...prev, [campaign.data.objectId]: e.target.value }))}
+            />
+            <button onClick={() => donate(campaign.data.objectId, parseFloat(donationAmounts[campaign.data.objectId] || '0') * 1_000_000_000, donationMessages[campaign.data.objectId] || '')}
+                    disabled={!campaign.data.content.fields.active}>Fund</button>
+          </div>
 
-      {account.address === campaign.data.content.fields.beneficiary && campaign.data.content.fields.active && (
-         <div className="button-group">
-            <button className="withdraw-btn" onClick={() => withdraw(campaign.data.objectId)}>Withdraw</button>
-         </div>
-      )}
+          {account.address === campaign.data.content.fields.beneficiary && campaign.data.content.fields.active && (
+             <div className="button-group">
+                <button className="withdraw-btn" onClick={() => withdraw(campaign.data.objectId)}>Withdraw</button>
+             </div>
+          )}
+        </div>
+
+        <FundUsageReportSection
+          campaign={campaign}
+          account={account}
+          PACKAGE_ID={PACKAGE_ID}
+          formatSui={formatSui}
+          signAndExecute={signAndExecute}
+          profilesId={profilesId}
+        />
+      </div>
 
       <div className="content-sections">
         <div className="section-container">
@@ -125,15 +138,6 @@ const CampaignDetail = ({
             )}
           </div>
         </div>
-
-        <FundUsageReportSection
-          campaign={campaign}
-          account={account}
-          PACKAGE_ID={PACKAGE_ID}
-          formatSui={formatSui}
-          signAndExecute={signAndExecute}
-          profilesId={profilesId} // Added
-        />
       </div>
     </div>
   );
