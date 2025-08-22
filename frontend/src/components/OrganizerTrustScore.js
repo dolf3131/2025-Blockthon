@@ -14,13 +14,17 @@ const OrganizerTrustScore = ({
     'devInspectTransactionBlock',
     {
       sender: organizerAddress,
-      transactionBlock: new Transaction().moveCall({
-        target: `${PACKAGE_ID}::donation::get_organizer_trust_score`,
-        arguments: [
-          new Transaction().object(profilesId),
-          new Transaction().pure.address(organizerAddress),
-        ],
-      }),
+      transactionBlock: (() => {
+        const txb = new Transaction();
+        txb.moveCall({
+          target: `${PACKAGE_ID}::donation::get_organizer_trust_score`,
+          arguments: [
+            txb.object(profilesId),
+            txb.pure.address(organizerAddress),
+          ],
+        });
+        return txb;
+      })(),
     },
     { enabled: !!organizerAddress && !!profilesId }
   );
