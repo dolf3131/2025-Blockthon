@@ -27,11 +27,17 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
                 showEffects: true,
               },
             }).then(txbResponse => {
-              console.log('getTransactionBlock successful:', txbResponse);
-              if (onSuccessCallback) {
-                onSuccessCallback(txbResponse);
+              console.log('getTransactionBlock result:', txbResponse);
+              if (txbResponse.effects?.status?.status === 'success') {
+                if (onSuccessCallback) {
+                  onSuccessCallback(txbResponse);
+                } else {
+                  alert('Transaction successful!');
+                }
               } else {
-                alert('Transaction successful!');
+                const error = txbResponse.effects?.status?.error || 'Transaction failed';
+                console.error('Transaction failed:', error);
+                alert(`Error: ${error}`);
               }
             });
           }, 2000);

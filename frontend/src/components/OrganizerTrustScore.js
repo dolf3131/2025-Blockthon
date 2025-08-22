@@ -7,8 +7,7 @@ const OrganizerTrustScore = ({
   organizerAddress,
   profilesId,
 }) => {
-  console.log("OrganizerTrustScore: organizerAddress", organizerAddress);
-  console.log("OrganizerTrustScore: profilesId", profilesId);
+  
 
   const { data, isLoading, isError, error } = useSuiClientQuery(
     'devInspectTransactionBlock',
@@ -28,11 +27,6 @@ const OrganizerTrustScore = ({
     },
     { enabled: !!organizerAddress && !!profilesId }
   );
-
-  console.log("OrganizerTrustScore: isLoading", isLoading);
-  console.log("OrganizerTrustScore: isError", isError);
-  console.log("OrganizerTrustScore: error object", error);
-  console.log("OrganizerTrustScore: data", data);
 
   if (isLoading) return <p>Loading trust score...</p>;
   if (isError) return <p>Error loading trust score. Details: {error?.message}</p>;
