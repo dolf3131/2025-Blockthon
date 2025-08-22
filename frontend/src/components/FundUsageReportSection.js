@@ -54,8 +54,7 @@ const FundUsageReportSection = ({
         txb.object(campaign.data.objectId),
         txb.pure.string(reportTitle),
         txb.pure.string(reportDescription),
-        txb.pure.u64(0), // spent_amount (placeholder)
-        txb.pure.u64(0), // remaining_amount (placeholder)
+        
         txb.pure.string(finalProofUrl),
         txb.object('0x6') // Clock object
       ],
