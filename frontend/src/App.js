@@ -12,7 +12,7 @@ import Profile from './components/Profile';
 
 import { PACKAGE_ID, PROFILES_OBJECT_ID } from './config';
 
-function Home({ account, client, signAndExecute, campaigns, selectedCampaign, setSelectedCampaign, donationAmounts, handleAmountChange, donationMessages, setDonationMessages, donate, withdraw, formatSui, name, setName, description, setDescription, organizerName, setOrganizerName, goal, setGoal, duration, setDuration, createCampaign, isLoading, isError }) {
+function Home({ account, client, signAndExecute, campaigns, selectedCampaign, setSelectedCampaign, donationAmounts, handleAmountChange, donationMessages, setDonationMessages, donate, withdraw, formatSui, name, setName, description, setDescription, organizerName, setOrganizerName, goal, setGoal, duration, setDuration, createCampaign, isLoading, isError, profilesId }) {
   return (
     <div>
       <h2>Welcome, {account.address.slice(0, 6)}...{account.address.slice(-4)}</h2>
