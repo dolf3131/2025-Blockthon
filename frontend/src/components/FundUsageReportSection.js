@@ -42,7 +42,9 @@ const FundUsageReportSection = ({
         txb.object(campaign.data.objectId),
         txb.pure.string(reportTitle),
         txb.pure.string(reportDescription),
-        txb.pure.string(proofUrl), // proofUrl is now optional by allowing empty string
+        txb.pure.u64(0), // spent_amount (placeholder)
+        txb.pure.u64(0), // remaining_amount (placeholder)
+        txb.pure.string(proofUrl),
         txb.object('0x6') // Clock object
       ],
     });
