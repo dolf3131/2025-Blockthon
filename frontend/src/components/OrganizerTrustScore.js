@@ -43,6 +43,10 @@ const OrganizerTrustScore = ({
 
   const trustScore = totalCampaigns > 0 ? (successfulCampaigns / totalCampaigns) * 100 : 0;
 
+  if (totalCampaigns === 0) {
+    return <p>Trust Score: Unknown</p>;
+  }
+
   return (
     <p>Trust Score: {trustScore.toFixed(2)}% ({successfulCampaigns}/{totalCampaigns} successful)</p>
   );

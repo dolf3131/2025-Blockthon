@@ -1,0 +1,58 @@
+.profile-page .card {
+  margin-top: 30px;
+}
+
+.profile-page h2 {
+    font-weight: 700;
+    color: #343a40;
+}
+
+.profile-page .nft-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.nft-card-profile {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.nft-card-profile h4 {
+    margin-top: 0;
+    color: #007bff;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.nft-card-profile p {
+    margin: 8px 0;
+    color: #495057;
+}
+
+.campaign-card-profile {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: left;
+    margin-bottom: 20px; /* Add some space between campaign cards */
+}
+
+.campaign-card-profile h4 {
+    margin-top: 0;
+    color: #007bff;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.campaign-card-profile p {
+    margin: 8px 0;
+    color: #495057;
+}

@@ -26,8 +26,7 @@ const CampaignList = ({
              onClick={() => setSelectedCampaign(campaign)}>
           <h4>{campaign.data.content.fields.name} <span className={`status-indicator ${campaign.data.content.fields.active ? 'in-progress' : 'closed'}`}></span></h4>
           <p>{campaign.data.content.fields.description}</p>
-          <p><b>Organizer:</b> {campaign.data.content.fields.organizer_name}</p>
-          <OrganizerTrustScore organizerAddress={campaign.data.content.fields.beneficiary} profilesId={profilesId} />
+          <p><b>Organizer:</b> {campaign.data.content.fields.organizer_name} <OrganizerTrustScore organizerAddress={campaign.data.content.fields.beneficiary} profilesId={profilesId} /></p>
           <hr />
           <p><b>Beneficiary:</b> {campaign.data.content.fields.beneficiary.slice(0, 6)}...{campaign.data.content.fields.beneficiary.slice(-4)}</p>
           <p><b>Goal:</b> {(campaign.data.content.fields.goal / 1_000_000_000).toFixed(3)} SUI</p>

@@ -70,9 +70,8 @@ const CampaignDetail = ({
       <button className="back-button" onClick={() => setSelectedCampaign(null)}>Back to Campaigns</button>
       <h3>{campaign.data.content.fields.name} <span className={`status-indicator ${campaign.data.content.fields.active ? 'in-progress' : 'closed'}`}></span></h3>
       <p><b>Description:</b> {campaign.data.content.fields.description}</p>
-      <p><b>Organizer:</b> {campaign.data.content.fields.organizer_name}</p>
+      <p><b>Organizer:</b> {campaign.data.content.fields.organizer_name} <OrganizerTrustScore organizerAddress={campaign.data.content.fields.beneficiary} profilesId={profilesId} /></p>
       <p><b>Beneficiary:</b> {campaign.data.content.fields.beneficiary}</p>
-      <OrganizerTrustScore organizerAddress={campaign.data.content.fields.beneficiary} profilesId={profilesId} />
       <p><b>Goal:</b> {formatSui(campaign.data.content.fields.goal)}</p>
       <p><b>Deadline:</b> {new Date(Number(campaign.data.content.fields.deadline)).toLocaleString()}</p>
       <p><b>Donated:</b> {formatSui(campaign.data.content.fields.donated_amount)}</p>
