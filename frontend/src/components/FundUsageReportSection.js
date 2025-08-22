@@ -11,8 +11,6 @@ const FundUsageReportSection = ({
 }) => {
   const [reportTitle, setReportTitle] = useState('');
   const [reportDescription, setReportDescription] = useState('');
-  const [spentAmount, setSpentAmount] = useState('');
-  const [remainingAmount, setRemainingAmount] = useState('');
   const [proofUrl, setProofUrl] = useState('');
 
   const { data: fundUsageReportData, isLoading: isLoadingFundUsageReports, isError: isErrorFundUsageReports, refetch: refetchFundUsageReports } = useSuiClientQuery(
@@ -27,8 +25,8 @@ const FundUsageReportSection = ({
   );
 
   const submitReport = () => {
-    if (!account || !reportTitle || !reportDescription || spentAmount === '' || remainingAmount === '') {
-      alert('Please fill out all report fields.');
+    if (!account || !reportTitle || !reportDescription) { // Removed spentAmount and remainingAmount check
+      alert('Please fill out all required report fields (Title, Description).');
       return;
     }
 
@@ -39,9 +37,7 @@ const FundUsageReportSection = ({
         txb.object(campaign.data.objectId),
         txb.pure.string(reportTitle),
         txb.pure.string(reportDescription),
-        txb.pure.u64(parseFloat(spentAmount) * 1_000_000_000),
-        txb.pure.u64(parseFloat(remainingAmount) * 1_000_000_000),
-        txb.pure.string(proofUrl),
+        txb.pure.string(proofUrl), // proofUrl is now optional by allowing empty string
         txb.object('0x6') // Clock object
       ],
     });
@@ -54,8 +50,6 @@ const FundUsageReportSection = ({
           // Clear form
           setReportTitle('');
           setReportDescription('');
-          setSpentAmount('');
-          setRemainingAmount('');
           setProofUrl('');
           // Refetch reports
           refetchFundUsageReports();
@@ -86,19 +80,7 @@ const FundUsageReportSection = ({
               onChange={(e) => setReportDescription(e.target.value)}
             ></textarea>
             <input
-              type="number"
-              placeholder="Amount Spent (in SUI)"
-              value={spentAmount}
-              onChange={(e) => setSpentAmount(e.target.value)}
-            />
-            <input
-              type="number"
-              placeholder="Amount Remaining (in SUI)"
-              value={remainingAmount}
-              onChange={(e) => setRemainingAmount(e.target.value)}
-            />
-            <input
-              type="text"
+              type="text" // Changed from number to text for URL
               placeholder="Proof URL (optional)"
               value={proofUrl}
               onChange={(e) => setProofUrl(e.target.value)}
@@ -118,8 +100,7 @@ const FundUsageReportSection = ({
               <h5>{report.parsedJson.report_title}</h5>
               <p><strong>Reporter:</strong> {report.parsedJson.reporter.slice(0, 6)}...{report.parsedJson.reporter.slice(-4)}</p>
               <p><strong>Description:</strong> {report.parsedJson.report_description}</p>
-              <p><strong>Spent:</strong> {formatSui(report.parsedJson.spent_amount)}</p>
-              <p><strong>Remaining:</strong> {formatSui(report.parsedJson.remaining_amount)}</p>
+              {/* Removed Spent and Remaining display */}
               {report.parsedJson.proof_url && <p><strong>Proof:</strong> <a href={report.parsedJson.proof_url} target="_blank" rel="noopener noreferrer">{report.parsedJson.proof_url}</a></p>}
               <p className="timestamp">{new Date(parseInt(report.timestampMs)).toLocaleString()}</p>
             </div>

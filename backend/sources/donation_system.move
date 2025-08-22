@@ -1,331 +1,262 @@
-module donation_system::donation {
-    use sui::coin::{Self, Coin};
+module donation_system::donation_system {
+    use sui::object::{ID, UID};
+    use sui::tx_context::TxContext;
     use sui::balance::{Self, Balance};
+    use sui::coin::{Self, Coin};
     use sui::sui::SUI;
-    
-    use sui::event;
-    
-    use sui::clock::{Self, Clock};
-    use std::string::{Self, String};
-    
-    use sui::display;
-    use sui::package;
     use sui::table::{Self, Table};
+    use sui::event;
+    use sui::clock::Clock;
+    use sui::transfer;
+    use std::string::String;
 
-    // === Errors ===
-    const ENotCampaignOwner: u64 = 0;
-    const ECampaignInactive: u64 = 1;
-    const EGoalNotMet: u64 = 2;
-    const ECampaignFinished: u64 = 3;
+    const ECampaignNotActive: u64 = 0;
+    const EInvalidDonationAmount: u64 = 1;
+    const ECampaignEnded: u64 = 2;
+    const ENotOrganizer: u64 = 3;
+    const EWithdrawalNotAllowed: u64 = 4;
 
-    const PLATFORM_FEE_PERCENTAGE: u64 = 5;
-    const PLATFORM_FEE_ADDRESS: address = @0xe2dde3ab1bfacae12b027588e0bd546eb1a295a80e993c9fbaed909318ecfdcd; // Placeholder for platform's address
-
-    // === Objects ===
-    public struct DonationCampaign has key, store {
+    public struct CampaignAdminCap has key, store {
         id: UID,
+        campaign_id: ID
+    }
+
+    public struct Campaign has key, store {
+        id: UID,
+        organizer: address,
         name: String,
         description: String,
-        organizer_name: String,
-        beneficiary: address,
         goal: u64,
-        donated_amount: u64,
-        deadline: u64,
-        vault: Balance<SUI>,
-        active: bool
+        raised: u64,
+        funds: Balance<SUI>,
+        start_time: u64,
+        end_time: u64,
+        is_active: bool,
+        reports: vector<FundUsageReport>,
     }
 
-    public struct DonationNFT has key, store {
+    public struct FundUsageReport has store {
+        report_time: u64,
+        description: String,
+        amount: u64,
+    }
+
+    public struct DonationInfo has copy, drop {
+        campaign_id: ID,
+        donor: address,
+        amount: u64,
+    }
+
+    public struct CampaignStore has key {
+        id: UID,
+        campaigns: Table<ID, Campaign>,
+    }
+
+    public struct Donation has key, store {
         id: UID,
         campaign_id: ID,
-        donor_address: address,
-        amount_donated: u64,
-        timestamp_ms: u64,
-        campaign_name: String,
+        donor: address,
+        amount: u64,
+        donation_time: u64,
     }
 
-    public struct NftId has store, copy, drop {
-        nft_id: ID,
-    }
-
-    public struct UserProfile has store {
-        nfts: vector<NftId>,
-        total_campaigns_created: u64,
-        successful_campaigns: u64,
-    }
-
-    public struct Profiles has key {
+    public struct DonationStore has key {
         id: UID,
-        profiles: Table<address, UserProfile>,
+        donations: Table<ID, Donation>,
     }
 
-    // Define the One-Time Witness struct
-    public struct DONATION has drop {}
+    public struct OrganizerProfile has key, store {
+        id: UID,
+        organizer: address,
+        name: String,
+        bio: String,
+        trust_score: u64,
+    }
 
-    // Updated init function for DonationNFT
-    #[allow(lint(share_owned))]
-    fun init(otw: DONATION, ctx: &mut TxContext) {
-        let keys = vector<String>[
-            string::utf8(b"name"),
-            string::utf8(b"description"),
-            string::utf8(b"image_url"),
-            string::utf8(b"project_url"),
-        ];
+    public struct DonorProfile has key, store {
+        id: UID,
+        donor: address,
+        name: String,
+        donation_history: vector<ID>,
+    }
 
-        let values = vector<String>[
-            string::utf8(b"Donation NFT for "),
-            string::utf8(b"A commemorative NFT for your generous donation to "),
-            string::utf8(b"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlncmh0PSIyMDAiIGZpbGw9InJlZCIvPjwvc3ZnPg=="), // Placeholder image URL
-            string::utf8(b"https://example.com/"), // Placeholder project URL
-        ];
-
-        let publisher = package::claim(otw, ctx);
-
-        let mut display = display::new_with_fields<DonationNFT>(
-            &publisher,
-            keys,
-            values,
-            ctx
-        );
-
-        display::update_version(&mut display);
-        sui::transfer::public_share_object(display);
-        package::burn_publisher(publisher);
-
-        sui::transfer::share_object(Profiles {
-            id: object::new(ctx),
-            profiles: table::new(ctx),
+    fun init(ctx: &mut TxContext) {
+        transfer::share_object(CampaignStore {
+            id: sui::object::new(ctx),
+            campaigns: table::new(ctx),
+        });
+        transfer::share_object(DonationStore {
+            id: sui::object::new(ctx),
+            donations: table::new(ctx),
         });
     }
 
-    // === Events ===
-    public struct CampaignCreated has copy, drop {
-        campaign_id: ID,
-        name: String,
-        description: String,
-        organizer_name: String,
-        beneficiary: address,
-        goal: u64,
-        deadline: u64,
-    }
-
-    public struct Donated has copy, drop {
-        campaign_id: ID,
-        amount: u64,
-        message: String,
-    }
-
-    public struct Withdrawn has copy, drop {
-        campaign_id: ID,
-        amount: u64,
-    }
-
-    public struct FundUsageReported has copy, drop {
-        campaign_id: ID,
-        reporter: address,
-        report_title: String,
-        report_description: String,
-        spent_amount: u64,
-        remaining_amount: u64,
-        proof_url: String,
-        timestamp_ms: u64,
-    }
-
-    // === Public Functions ===
     public entry fun create_campaign(
-        profiles: &mut Profiles,
+        store: &mut CampaignStore,
         name: String,
         description: String,
-        organizer_name: String,
-        beneficiary: address,
         goal: u64,
-        deadline: u64,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
-        let campaign = DonationCampaign {
-            id: object::new(ctx),
+        let sender = sui::tx_context::sender(ctx);
+        let campaign = Campaign {
+            id: sui::object::new(ctx),
+            organizer: sender,
             name,
             description,
-            organizer_name,
-            beneficiary,
             goal,
-            donated_amount: 0,
-            deadline,
-            vault: balance::zero(),
-            active: true,
+            raised: 0,
+            funds: balance::zero(),
+            start_time: sui::clock::timestamp_ms(clock),
+            end_time: sui::clock::timestamp_ms(clock) + 1000 * 60 * 60 * 24 * 30, // 30 days
+            is_active: true,
+            reports: vector[],
         };
+        let campaign_id = sui::object::id(&campaign);
+        let admin_cap = CampaignAdminCap {
+            id: sui::object::new(ctx),
+            campaign_id: campaign_id,
+        };
+        let admin_cap_id = sui::object::id(&admin_cap);
+        table::add(&mut store.campaigns, campaign_id, campaign);
+        transfer::transfer(admin_cap, sender);
 
         event::emit(CampaignCreated {
-            campaign_id: object::id(&campaign),
-            name: campaign.name,
-            description: campaign.description,
-            organizer_name: campaign.organizer_name,
-            beneficiary,
-            goal,
-            deadline,
+            campaign_id,
+            admin_cap_id,
+            organizer: sender,
         });
+    }
 
-        // Add logic to update UserProfile
-        if (!table::contains(&profiles.profiles, beneficiary)) {
-            let user_profile = UserProfile {
-                nfts: vector[],
-                total_campaigns_created: 1,
-                successful_campaigns: 0
-            };
-            table::add(&mut profiles.profiles, beneficiary, user_profile);
-        } else {
-            let user_profile = table::borrow_mut(&mut profiles.profiles, beneficiary);
-            user_profile.total_campaigns_created = user_profile.total_campaigns_created + 1;
+    public entry fun update_campaign_goal(
+        store: &mut CampaignStore,
+        cap: &CampaignAdminCap,
+        new_goal: u64
+    ) {
+        let campaign = table::borrow_mut(&mut store.campaigns, cap.campaign_id);
+        campaign.goal = new_goal;
+    }
+
+    public entry fun add_fund_usage_report(
+        store: &mut CampaignStore,
+        cap: &CampaignAdminCap,
+        description: String,
+        amount: u64,
+        clock: &Clock
+    ) {
+        let campaign = table::borrow_mut(&mut store.campaigns, cap.campaign_id);
+        assert!(campaign.is_active, ECampaignNotActive);
+
+        let report = FundUsageReport {
+            report_time: sui::clock::timestamp_ms(clock),
+            description,
+            amount
         };
+        campaign.reports.push_back(report);
+    }
 
-        sui::transfer::share_object(campaign);
+    public entry fun end_campaign(store: &mut CampaignStore, cap: &CampaignAdminCap) {
+        let campaign = table::borrow_mut(&mut store.campaigns, cap.campaign_id);
+        campaign.is_active = false;
     }
 
     public entry fun donate(
-        profiles: &mut Profiles,
-        campaign: &mut DonationCampaign,
-        donation: Coin<SUI>,
-        message: String,
+        store: &mut CampaignStore,
+        donations: &mut DonationStore,
+        campaign_id: ID,
+        payment: Coin<SUI>,
         clock: &Clock,
         ctx: &mut TxContext
     ) {
-        assert!(campaign.active, ECampaignInactive);
-        assert!(clock::timestamp_ms(clock) < campaign.deadline, ECampaignFinished);
+        let amount = coin::value(&payment);
+        assert!(amount > 0, EInvalidDonationAmount);
+        let campaign = table::borrow_mut(&mut store.campaigns, campaign_id);
+        assert!(campaign.is_active, ECampaignNotActive);
+        let current_time = sui::clock::timestamp_ms(clock);
+        assert!(current_time < campaign.end_time, ECampaignEnded);
 
-        let amount = coin::value(&donation);
-        campaign.donated_amount = campaign.donated_amount + amount;
+        let donation_balance = coin::into_balance(payment);
+        balance::join(&mut campaign.funds, donation_balance);
+        campaign.raised = campaign.raised + amount;
+        let sender = sui::tx_context::sender(ctx);
 
-        balance::join(&mut campaign.vault, coin::into_balance(donation));
-
-        let sender = tx_context::sender(ctx);
-
-        let nft = DonationNFT {
-            id: object::new(ctx),
-            campaign_id: object::id(campaign),
-            donor_address: sender,
-            amount_donated: amount,
-            timestamp_ms: clock::timestamp_ms(clock),
-            campaign_name: campaign.name,
-        };
-
-        let nft_id = NftId {
-            nft_id: object::id(&nft)
-        };
-
-        if (!table::contains(&profiles.profiles, sender)) {
-            let user_profile = UserProfile { nfts: vector[nft_id], total_campaigns_created: 0, successful_campaigns: 0 };
-            table::add(&mut profiles.profiles, sender, user_profile);
-        } else {
-            let user_profile = table::borrow_mut(&mut profiles.profiles, sender);
-            vector::push_back(&mut user_profile.nfts, nft_id);
-        };
-
-        sui::transfer::public_transfer(nft, sender);
-
-        event::emit(Donated {
-            campaign_id: object::id(campaign),
+        let donation = Donation {
+            id: sui::object::new(ctx),
+            campaign_id,
+            donor: sender,
             amount,
-            message,
-        });
-    }
-
-    public entry fun withdraw(
-        profiles: &mut Profiles,
-        campaign: &mut DonationCampaign,
-        ctx: &mut TxContext
-    ) {
-        assert!(tx_context::sender(ctx) == campaign.beneficiary, ENotCampaignOwner);
-        assert!(campaign.donated_amount >= campaign.goal, EGoalNotMet);
-
-        let total_amount = balance::value(&campaign.vault);
-        let platform_fee_amount = total_amount * PLATFORM_FEE_PERCENTAGE / 100;
-        let beneficiary_amount = total_amount - platform_fee_amount;
-
-        let platform_funds = balance::split(&mut campaign.vault, platform_fee_amount);
-        let beneficiary_funds = balance::split(&mut campaign.vault, beneficiary_amount);
-
-        sui::transfer::public_transfer(coin::from_balance(platform_funds, ctx), PLATFORM_FEE_ADDRESS);
-        sui::transfer::public_transfer(coin::from_balance(beneficiary_funds, ctx), campaign.beneficiary);
-
-        campaign.active = false;
-
-        // Add logic to update UserProfile
-        let user_profile = table::borrow_mut(&mut profiles.profiles, campaign.beneficiary);
-        user_profile.successful_campaigns = user_profile.successful_campaigns + 1;
-
-        event::emit(Withdrawn {
-            campaign_id: object::id(campaign),
-            amount: total_amount,
-        });
-    }
-
-    public entry fun submit_fund_usage_report(
-        campaign: &mut DonationCampaign,
-        report_title: String,
-        report_description: String,
-        spent_amount: u64,
-        remaining_amount: u64,
-        proof_url: String,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        assert!(tx_context::sender(ctx) == campaign.beneficiary, ENotCampaignOwner);
-
-        event::emit(FundUsageReported {
-            campaign_id: object::id(campaign),
-            reporter: tx_context::sender(ctx),
-            report_title,
-            report_description,
-            spent_amount,
-            remaining_amount,
-            proof_url,
-            timestamp_ms: clock::timestamp_ms(clock),
-        });
-    }
-
-    // === Getter Functions ===
-
-    public fun get_user_nfts(profiles_obj: &Profiles, user_address: address): vector<address> {
-        let mut user_profile_nfts = vector::empty<address>();
-
-        if (table::contains(&profiles_obj.profiles, user_address)) {
-            let user_profile = table::borrow(&profiles_obj.profiles, user_address);
-            let nfts_vec = &user_profile.nfts; // This is a vector<NftId>
-
-            let mut i = 0;
-            let len = vector::length(nfts_vec);
-            while (i < len) {
-                let nft_id_struct = vector::borrow(nfts_vec, i);
-                vector::push_back(&mut user_profile_nfts, object::id_to_address(&nft_id_struct.nft_id));
-                i = i + 1;
-            };
+            donation_time: current_time,
         };
+        table::add(&mut donations.donations, sui::object::id(&donation), donation);
 
-        user_profile_nfts
+        event::emit(DonationInfo {
+            campaign_id,
+            donor: sender,
+            amount,
+        });
     }
 
-    public fun donated_amount(campaign: &DonationCampaign): u64 {
-        campaign.donated_amount
+    public entry fun withdraw_funds(
+        store: &mut CampaignStore,
+        cap: &CampaignAdminCap,
+        amount: u64,
+        ctx: &mut TxContext
+    ) {
+        let campaign = table::borrow_mut(&mut store.campaigns, cap.campaign_id);
+        let sender = sui::tx_context::sender(ctx);
+        assert!(sender == campaign.organizer, ENotOrganizer);
+        assert!(!campaign.is_active, EWithdrawalNotAllowed);
+
+        let funds = balance::split(&mut campaign.funds, amount);
+        transfer::public_transfer(coin::from_balance(funds, ctx), sender);
     }
 
-    public fun goal(campaign: &DonationCampaign): u64 {
-        campaign.goal
+    public entry fun create_organizer_profile(name: String, bio: String, ctx: &mut TxContext) {
+        let sender = sui::tx_context::sender(ctx);
+        let profile = OrganizerProfile {
+            id: sui::object::new(ctx),
+            organizer: sender,
+            name,
+            bio,
+            trust_score: 100,
+        };
+        transfer::transfer(profile, sender);
     }
 
-    public fun beneficiary(campaign: &DonationCampaign): address {
-        campaign.beneficiary
+    public entry fun update_organizer_profile(profile: &mut OrganizerProfile, name: String, bio: String) {
+        profile.name = name;
+        profile.bio = bio;
     }
 
-    public fun is_active(campaign: &DonationCampaign): bool {
-        campaign.active
+    public entry fun create_donor_profile(name: String, ctx: &mut TxContext) {
+        let sender = sui::tx_context::sender(ctx);
+        let profile = DonorProfile {
+            id: sui::object::new(ctx),
+            donor: sender,
+            name,
+            donation_history: vector[],
+        };
+        transfer::transfer(profile, sender);
     }
 
-    public fun get_organizer_trust_score(profiles_obj: &Profiles, organizer_address: address): (u64, u64) {
-        if (table::contains(&profiles_obj.profiles, organizer_address)) {
-            let user_profile = table::borrow(&profiles_obj.profiles, organizer_address);
-            return (user_profile.successful_campaigns, user_profile.total_campaigns_created)
-        } else {
-            return (0, 0) // No campaigns created yet
-        }
+    public entry fun update_donor_profile(profile: &mut DonorProfile, name: String) {
+        profile.name = name;
+    }
+
+    public fun get_campaign_details(store: &CampaignStore, id: ID): &Campaign {
+        table::borrow(&store.campaigns, id)
+    }
+
+    public fun get_donation_details(store: &DonationStore, id: ID): &Donation {
+        table::borrow(&store.donations, id)
+    }
+
+    public fun get_organizer_profile(profile: &OrganizerProfile): (address, String, String, u64) {
+        (profile.organizer, profile.name, profile.bio, profile.trust_score)
+    }
+
+    public fun get_donor_profile(profile: &DonorProfile): (address, String, vector<ID>) {
+        (profile.donor, profile.name, profile.donation_history)
     }
 }
