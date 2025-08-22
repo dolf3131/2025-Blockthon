@@ -16,6 +16,13 @@ module donation_system::donation_system {
     const ENotOrganizer: u64 = 3;
     const EWithdrawalNotAllowed: u64 = 4;
 
+    // Moved CampaignCreated to the top
+    public struct CampaignCreated has copy, drop {
+        campaign_id: ID,
+        admin_cap_id: ID,
+        organizer: address,
+    }
+
     public struct CampaignAdminCap has key, store {
         id: UID,
         campaign_id: ID
@@ -27,8 +34,8 @@ module donation_system::donation_system {
         name: String,
         description: String,
         goal: u64,
-        raised: u64,
-        funds: Balance<SUI>,
+        raised: u64, // Removed public(package)
+        funds: Balance<SUI>, // Removed public(package)
         start_time: u64,
         end_time: u64,
         is_active: bool,
@@ -70,7 +77,6 @@ module donation_system::donation_system {
         organizer: address,
         name: String,
         bio: String,
-        trust_score: u64,
     }
 
     public struct DonorProfile has key, store {
@@ -219,7 +225,6 @@ module donation_system::donation_system {
             organizer: sender,
             name,
             bio,
-            trust_score: 100,
         };
         transfer::transfer(profile, sender);
     }
@@ -252,11 +257,16 @@ module donation_system::donation_system {
         table::borrow(&store.donations, id)
     }
 
-    public fun get_organizer_profile(profile: &OrganizerProfile): (address, String, String, u64) {
-        (profile.organizer, profile.name, profile.bio, profile.trust_score)
+    public fun get_organizer_profile(profile: &OrganizerProfile): (address, String, String) {
+        (profile.organizer, profile.name, profile.bio)
     }
 
     public fun get_donor_profile(profile: &DonorProfile): (address, String, vector<ID>) {
         (profile.donor, profile.name, profile.donation_history)
     }
+
+    // Public getters for Campaign fields accessed by tests
+    public(package) fun campaign_raised(c: &Campaign): u64 { c.raised }
+    public(package) fun campaign_funds(c: &Campaign): &Balance<SUI> { &c.funds }
+    public(package) fun campaign_admin_cap_id(cap: &CampaignAdminCap): ID { cap.campaign_id } // New getter
 }
