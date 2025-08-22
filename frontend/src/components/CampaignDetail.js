@@ -113,7 +113,7 @@ const CampaignDetail = ({
             {isErrorDonatedEvents && <p>Error loading messages.</p>}
             {Object.values(groupedMessages).flatMap(group => group.messages).length > 0 ? (
               Object.values(groupedMessages).flatMap(group => group.messages).map((msg, msgIndex) => (
-                <div key={msgIndex} className="message-item">
+                <div key={msgIndex} className="message-item card">
                   <p><strong>From:</strong> {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}</p>
                   <p><strong>Amount:</strong> {formatSui(msg.amount)}</p>
                   <p><strong>Message:</strong> {msg.message}</p>
