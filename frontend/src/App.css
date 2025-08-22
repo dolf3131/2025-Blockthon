@@ -396,3 +396,19 @@ body {
     margin: 8px 0;
     color: #495057;
 }
+
+.content-sections {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: 20px; /* Space between the two sections */
+}
+
+.content-sections > .section-container {
+  flex: 1 1 48%; /* Grow, shrink, and take up roughly half the width */
+  min-width: 300px; /* Minimum width to prevent squishing on very small screens */
+}
+
+/* Adjust padding for nested cards if necessary */
+.content-sections .card {
+  padding: 20px; /* Slightly less padding for nested cards */
+}

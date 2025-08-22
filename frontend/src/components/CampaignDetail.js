@@ -103,31 +103,35 @@ const CampaignDetail = ({
          </div>
       )}
 
-      <div className="message-list">
-        <h4>Funder Messages</h4>
-        {isLoadingDonatedEvents && <p>Loading messages...</p>}
-        {isErrorDonatedEvents && <p>Error loading messages.</p>}
-        {Object.values(groupedMessages).flatMap(group => group.messages).length > 0 ? (
-          Object.values(groupedMessages).flatMap(group => group.messages).map((msg, msgIndex) => (
-            <div key={msgIndex} className="message-item">
-              <p><strong>From:</strong> {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}</p>
-              <p><strong>Amount:</strong> {formatSui(msg.amount)}</p>
-              <p><strong>Message:</strong> {msg.message}</p>
-              <p className="timestamp">{msg.timestamp}</p>
-            </div>
-          ))
-        ) : (
-          !isLoadingDonatedEvents && <p>No messages yet.</p>
-        )}
-      </div>
+      <div className="content-sections">
+        <div className="section-container">
+          <div className="message-list">
+            <h4>Funder Messages</h4>
+            {isLoadingDonatedEvents && <p>Loading messages...</p>}
+            {isErrorDonatedEvents && <p>Error loading messages.</p>}
+            {Object.values(groupedMessages).flatMap(group => group.messages).length > 0 ? (
+              Object.values(groupedMessages).flatMap(group => group.messages).map((msg, msgIndex) => (
+                <div key={msgIndex} className="message-item">
+                  <p><strong>From:</strong> {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}</p>
+                  <p><strong>Amount:</strong> {formatSui(msg.amount)}</p>
+                  <p><strong>Message:</strong> {msg.message}</p>
+                  <p className="timestamp">{msg.timestamp}</p>
+                </div>
+              ))
+            ) : (
+              !isLoadingDonatedEvents && <p>No messages yet.</p>
+            )}
+          </div>
+        </div>
 
-      <FundUsageReportSection
-        campaign={campaign}
-        account={account}
-        PACKAGE_ID={PACKAGE_ID}
-        formatSui={formatSui}
-        signAndExecute={signAndExecute}
-      />
+        <FundUsageReportSection
+          campaign={campaign}
+          account={account}
+          PACKAGE_ID={PACKAGE_ID}
+          formatSui={formatSui}
+          signAndExecute={signAndExecute}
+        />
+      </div>
     </div>
   );
 };

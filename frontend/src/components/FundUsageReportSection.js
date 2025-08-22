@@ -69,7 +69,7 @@ const FundUsageReportSection = ({
   };
 
   return (
-    <>
+    <div className="section-container">
       {account.address === campaign.data.content.fields.beneficiary && (
         <div className="fund-usage-report-section">
           <h4>Submit Fund Usage Report</h4>
@@ -128,7 +128,7 @@ const FundUsageReportSection = ({
           !isLoadingFundUsageReports && <p>No fund usage reports yet.</p>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
