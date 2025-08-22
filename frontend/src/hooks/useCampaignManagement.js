@@ -10,6 +10,8 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
   const [organizerName, setOrganizerName] = useState("");
   const [donationAmounts, setDonationAmounts] = useState({});
   const [donationMessages, setDonationMessages] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalNft, setModalNft] = useState(null);
 
   const executeTransaction = (txb, onSuccessCallback) => {
     console.log("Executing signAndExecute...");
@@ -87,7 +89,7 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
     }
   };
 
-  const donate = (campaignId, amount, message, setModalNft, setIsModalOpen) => {
+  const donate = (campaignId, amount, message) => {
     console.log("Donate function called.");
     if (!account || !amount) return;
     const parsedAmount = parseInt(amount, 10);
@@ -180,6 +182,8 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
     organizerName, setOrganizerName,
     donationAmounts, setDonationAmounts,
     donationMessages, setDonationMessages,
+    isModalOpen, setIsModalOpen,
+    modalNft, setModalNft,
     createCampaign,
     donate,
     withdraw,
