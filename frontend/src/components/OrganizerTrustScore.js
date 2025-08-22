@@ -14,7 +14,7 @@ const OrganizerTrustScore = ({
     'devInspectTransactionBlock',
     {
       sender: organizerAddress,
-      transactionBlock: new TransactionBlock().moveCall({
+      transactionBlock: new Transaction().moveCall({
         target: `${PACKAGE_ID}::donation::get_organizer_trust_score`,
         arguments: [
           new TransactionBlock().object(profilesId),
