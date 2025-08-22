@@ -3,6 +3,7 @@ import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
 import { getSuiMoveConfig } from '@mysten/sui/client';
+import OrganizerTrustScore from './OrganizerTrustScore';
 
 const generateIdenticonSvg = (hash, size = 200) => {
   // Ensure hash is a string and long enough
@@ -191,6 +192,7 @@ const Profile = ({ client, profilesId }) => {
             <h2>User Profile</h2>
             <div className="card">
                 <p><strong>Address:</strong> {account.address}</p>
+                <OrganizerTrustScore organizerAddress={account.address} profilesId={profilesId} />
             </div>
 
             <h3>My NFTs</h3>

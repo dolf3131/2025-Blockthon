@@ -47,6 +47,8 @@ module donation_system::donation {
 
     public struct UserProfile has store {
         nfts: vector<NftId>,
+        total_campaigns_created: u64,
+        successful_campaigns: u64,
     }
 
     public struct Profiles has key {
@@ -128,6 +130,7 @@ module donation_system::donation {
 
     // === Public Functions ===
     public entry fun create_campaign(
+        profiles: &mut Profiles,
         name: String,
         description: String,
         organizer_name: String,
@@ -158,6 +161,19 @@ module donation_system::donation {
             goal,
             deadline,
         });
+
+        // Add logic to update UserProfile
+        if (!table::contains(&profiles.profiles, beneficiary)) {
+            let user_profile = UserProfile {
+                nfts: vector[],
+                total_campaigns_created: 1,
+                successful_campaigns: 0
+            };
+            table::add(&mut profiles.profiles, beneficiary, user_profile);
+        } else {
+            let user_profile = table::borrow_mut(&mut profiles.profiles, beneficiary);
+            user_profile.total_campaigns_created = user_profile.total_campaigns_created + 1;
+        };
 
         sui::transfer::share_object(campaign);
     }
@@ -194,7 +210,7 @@ module donation_system::donation {
         };
 
         if (!table::contains(&profiles.profiles, sender)) {
-            let user_profile = UserProfile { nfts: vector[nft_id] };
+            let user_profile = UserProfile { nfts: vector[nft_id], total_campaigns_created: 0, successful_campaigns: 0 };
             table::add(&mut profiles.profiles, sender, user_profile);
         } else {
             let user_profile = table::borrow_mut(&mut profiles.profiles, sender);
@@ -211,6 +227,7 @@ module donation_system::donation {
     }
 
     public entry fun withdraw(
+        profiles: &mut Profiles,
         campaign: &mut DonationCampaign,
         ctx: &mut TxContext
     ) {
@@ -224,6 +241,10 @@ module donation_system::donation {
         sui::transfer::public_transfer(funds, campaign.beneficiary);
 
         campaign.active = false;
+
+        // Add logic to update UserProfile
+        let user_profile = table::borrow_mut(&mut profiles.profiles, campaign.beneficiary);
+        user_profile.successful_campaigns = user_profile.successful_campaigns + 1;
 
         event::emit(Withdrawn {
             campaign_id: object::id(campaign),
@@ -290,5 +311,14 @@ module donation_system::donation {
 
     public fun is_active(campaign: &DonationCampaign): bool {
         campaign.active
+    }
+
+    public fun get_organizer_trust_score(profiles_obj: &Profiles, organizer_address: address): (u64, u64) {
+        if (table::contains(&profiles_obj.profiles, organizer_address)) {
+            let user_profile = table::borrow(&profiles_obj.profiles, organizer_address);
+            return (user_profile.successful_campaigns, user_profile.total_campaigns_created)
+        } else {
+            return (0, 0) // No campaigns created yet
+        }
     }
 }

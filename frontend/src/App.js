@@ -35,6 +35,7 @@ function Home({ account, client, signAndExecute, campaigns, selectedCampaign, se
             donationMessages={donationMessages} setDonationMessages={setDonationMessages}
             donate={donate} account={account} withdraw={withdraw}
             formatSui={formatSui}
+            profilesId={profilesId}
           />
         </>
       ) : (
@@ -46,6 +47,7 @@ function Home({ account, client, signAndExecute, campaigns, selectedCampaign, se
           PACKAGE_ID={PACKAGE_ID}
           formatSui={formatSui}
           signAndExecute={signAndExecute}
+          profilesId={profilesId}
         />
       )}
     </div>

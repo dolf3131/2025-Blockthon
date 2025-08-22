@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
 import FundUsageReportSection from './FundUsageReportSection';
+import OrganizerTrustScore from './OrganizerTrustScore';
 
 const CampaignDetail = ({
   campaign,
@@ -15,6 +16,7 @@ const CampaignDetail = ({
   PACKAGE_ID,
   formatSui,
   signAndExecute,
+  profilesId,
 }) => {
   
   const [groupedMessages, setGroupedMessages] = useState({});
@@ -70,6 +72,7 @@ const CampaignDetail = ({
       <p><b>Description:</b> {campaign.data.content.fields.description}</p>
       <p><b>Organizer:</b> {campaign.data.content.fields.organizer_name}</p>
       <p><b>Beneficiary:</b> {campaign.data.content.fields.beneficiary}</p>
+      <OrganizerTrustScore organizerAddress={campaign.data.content.fields.beneficiary} profilesId={profilesId} />
       <p><b>Goal:</b> {formatSui(campaign.data.content.fields.goal)}</p>
       <p><b>Deadline:</b> {new Date(Number(campaign.data.content.fields.deadline)).toLocaleString()}</p>
       <p><b>Donated:</b> {formatSui(campaign.data.content.fields.donated_amount)}</p>
