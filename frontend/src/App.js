@@ -45,6 +45,7 @@ function Home({ account, client, signAndExecute, campaigns, selectedCampaign, se
           donationMessages={donationMessages} setDonationMessages={setDonationMessages}
           PACKAGE_ID={PACKAGE_ID}
           formatSui={formatSui}
+          signAndExecute={signAndExecute}
         />
       )}
     </div>
