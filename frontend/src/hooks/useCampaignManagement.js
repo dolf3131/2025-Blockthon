@@ -76,10 +76,8 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
             txb.object(PROFILES_OBJECT_ID),
             txb.pure.string(name),
             txb.pure.string(description),
-            txb.pure.string(organizerName),
-            txb.pure.address(account.address),
             txb.pure.u64(goalAmount),
-            txb.pure.u64(deadline.getTime())
+            txb.pure.u64(parseInt(duration, 10)),
         ],
       });
       console.log("Calling executeTransaction from createCampaign...");

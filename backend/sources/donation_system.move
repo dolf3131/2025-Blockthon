@@ -102,6 +102,7 @@ module donation_system::donation_system {
         name: String,
         description: String,
         goal: u64,
+        duration_in_days: u64, // New argument
         clock: &Clock,
         ctx: &mut TxContext
     ) {
@@ -115,7 +116,7 @@ module donation_system::donation_system {
             raised: 0,
             funds: balance::zero(),
             start_time: sui::clock::timestamp_ms(clock),
-            end_time: sui::clock::timestamp_ms(clock) + 1000 * 60 * 60 * 24 * 30, // 30 days
+            end_time: sui::clock::timestamp_ms(clock) + 1000 * 60 * 60 * 24 * duration_in_days, // Use duration_in_days
             is_active: true,
             reports: vector[],
         };
