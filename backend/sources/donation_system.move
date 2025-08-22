@@ -115,17 +115,6 @@ module donation_system::donation {
         amount: u64,
     }
 
-    public struct FundUsageReported has copy, drop {
-        campaign_id: ID,
-        reporter: address,
-        report_title: String,
-        report_description: String,
-        spent_amount: u64,
-        remaining_amount: u64,
-        proof_url: String,
-        timestamp_ms: u64,
-    }
-
     // === Public Functions ===
     public entry fun create_campaign(
         name: String,
@@ -228,30 +217,6 @@ module donation_system::donation {
         event::emit(Withdrawn {
             campaign_id: object::id(campaign),
             amount: total_amount,
-        });
-    }
-
-    public entry fun submit_fund_usage_report(
-        campaign: &mut DonationCampaign,
-        report_title: String,
-        report_description: String,
-        spent_amount: u64,
-        remaining_amount: u64,
-        proof_url: String,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        assert!(tx_context::sender(ctx) == campaign.beneficiary, ENotCampaignOwner);
-
-        event::emit(FundUsageReported {
-            campaign_id: object::id(campaign),
-            reporter: tx_context::sender(ctx),
-            report_title,
-            report_description,
-            spent_amount,
-            remaining_amount,
-            proof_url,
-            timestamp_ms: clock::timestamp_ms(clock),
         });
     }
 
