@@ -31,6 +31,18 @@ const FundUsageReportSection = ({
       return;
     }
 
+    let finalProofUrl = proofUrl.trim(); // Trim whitespace
+
+    // If the URL is not empty and doesn't start with a protocol, prepend https://
+    if (finalProofUrl && !finalProofUrl.startsWith('http://') && !finalProofUrl.startsWith('https://')) {
+        finalProofUrl = `https://${finalProofUrl}`;
+    }
+
+    // If the URL is empty, send an empty string
+    if (!finalProofUrl) {
+        finalProofUrl = "";
+    }
+
     const txb = new Transaction();
     console.log("txb:", txb);
     console.log("txb.object:", txb.object);
@@ -44,7 +56,7 @@ const FundUsageReportSection = ({
         txb.pure.string(reportDescription),
         txb.pure.u64(0), // spent_amount (placeholder)
         txb.pure.u64(0), // remaining_amount (placeholder)
-        txb.pure.string(proofUrl),
+        txb.pure.string(finalProofUrl),
         txb.object('0x6') // Clock object
       ],
     });

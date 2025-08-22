@@ -110,8 +110,6 @@ module donation_system::donation {
         reporter: address,
         report_title: String,
         report_description: String,
-        spent_amount: u64,
-        remaining_amount: u64,
         proof_url: String,
         timestamp_ms: u64,
     }
@@ -227,8 +225,6 @@ module donation_system::donation {
         campaign: &mut DonationCampaign,
         report_title: String,
         report_description: String,
-        spent_amount: u64,
-        remaining_amount: u64,
         proof_url: String,
         clock: &Clock,
         ctx: &mut TxContext
@@ -240,8 +236,6 @@ module donation_system::donation {
             reporter: tx_context::sender(ctx),
             report_title,
             report_description,
-            spent_amount,
-            remaining_amount,
             proof_url,
             timestamp_ms: clock::timestamp_ms(clock),
         });
