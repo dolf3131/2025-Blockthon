@@ -52,7 +52,7 @@ This diagram shows the process of a campaign organizer withdrawing the collected
 graph TD
     subgraph "인출"
         A[생성자가 '인출하기' 실행] --> B[프론트엔드<br/>'withdraw' 함수 호출];
-        B --> C{스마트 컨트랙트<br/>인출 조건 검증<br/>&#40;호출자, 목표금액 달성 여부&#41;};
+        B --> C{스마트 컨트랙트<br/>인출 조건 검증<br/>#40;호출자, 목표금액 달성 여부#41;};
         C -- 성공 --> D[수수료 계산 후<br/>생성자에게 자금 전송];
         D --> E[캠페인 비활성화];
         C -- 실패 --> F[트랜잭션 실패];
