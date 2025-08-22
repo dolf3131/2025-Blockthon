@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
 import { PACKAGE_ID } from '../config';
+import { TransactionBlock } from '@mysten/sui/transactions';
 
 const OrganizerTrustScore = ({
   organizerAddress,
@@ -13,19 +14,13 @@ const OrganizerTrustScore = ({
     'devInspectTransactionBlock',
     {
       sender: organizerAddress,
-      transactionBlock: {
-        kind: 'MoveCall',
+      transactionBlock: new TransactionBlock().moveCall({
         target: `${PACKAGE_ID}::donation::get_organizer_trust_score`,
         arguments: [
-          { kind: 'Input', index: 0 }, // profiles_obj
-          { kind: 'Input', index: 1 }, // organizer_address
+          new TransactionBlock().object(profilesId),
+          new TransactionBlock().pure.address(organizerAddress),
         ],
-        typeArguments: [],
-      },
-      inputs: [
-        { kind: 'Object', value: profilesId },
-        { kind: 'Pure', value: organizerAddress, type: 'address' },
-      ],
+      }),
     },
     { enabled: !!organizerAddress && !!profilesId }
   );
