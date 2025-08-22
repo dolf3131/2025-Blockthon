@@ -4,6 +4,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID } from '../config';
 import { getSuiMoveConfig } from '@mysten/sui/client';
 import OrganizerTrustScore from './OrganizerTrustScore';
+import { useNavigate } from 'react-router-dom';
 
 const generateIdenticonSvg = (hash, size = 200) => {
   // Ensure hash is a string and long enough
@@ -65,11 +66,12 @@ const generateIdenticonSvg = (hash, size = 200) => {
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${svgRects}</svg>`;
 };
 
-const Profile = ({ client, profilesId }) => {
+const Profile = ({ client, profilesId, setSelectedCampaign }) => {
     const account = useCurrentAccount();
     const [nfts, setNfts] = useState([]);
     const [createdCampaigns, setCreatedCampaigns] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const getProfileNfts = async () => {
         if (!account || !client || !profilesId) return;
@@ -187,6 +189,11 @@ const Profile = ({ client, profilesId }) => {
         return <div>Loading profile...</div>;
     }
 
+    const handleCampaignClick = (campaign) => {
+      setSelectedCampaign(campaign);
+      navigate('/');
+    };
+
     return (
         <div className="profile-page">
             <h2>User Profile</h2>
@@ -232,7 +239,7 @@ const Profile = ({ client, profilesId }) => {
                     createdCampaigns.map(campaign => {
                         const deadlineDate = new Date(Number(campaign.data.content.fields.deadline)).toLocaleString();
                         return (
-                            <div key={campaign.data.objectId} className="campaign-card-profile">
+                            <div key={campaign.data.objectId} className="campaign-card-profile" onClick={() => handleCampaignClick(campaign)}>
                                 <h4>{campaign.data.content.fields.name}</h4>
                                 <p>Description: {campaign.data.content.fields.description}</p>
                                 <p>Goal: {(Number(campaign.data.content.fields.goal) / 1_000_000_000).toFixed(3)} SUI</p>

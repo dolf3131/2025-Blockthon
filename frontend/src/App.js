@@ -46,7 +46,7 @@ function App() {
                 campaignEvents={campaignEvents}
                 campaignManagement={campaignManagement}
               />} />
-              <Route path="/profile" element={<Profile client={client} profilesId={profilesId} />} />
+              <Route path="/profile" element={<Profile client={client} profilesId={profilesId} setSelectedCampaign={setSelectedCampaign} />} />
             </Routes>
           ) : (
             <p>Please connect your wallet to continue.</p>
