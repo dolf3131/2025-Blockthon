@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
 import { PACKAGE_ID } from '../config';
-import { TransactionBlock } from '@mysten/sui/transactions';
+import { Transaction } from '@mysten/sui/transactions';
 
 const OrganizerTrustScore = ({
   organizerAddress,
