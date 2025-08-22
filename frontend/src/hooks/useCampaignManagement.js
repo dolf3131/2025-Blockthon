@@ -71,14 +71,15 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
       const deadline = new Date(now.getFullYear(), now.getMonth(), now.getDate() + parseInt(duration, 10), 23, 59, 59, 999);
 
       txb.moveCall({
-        target: `${PACKAGE_ID}::donation_system::create_campaign`,
+        target: `${PACKAGE_ID}::donation::create_campaign`,
         arguments: [
             txb.object(PROFILES_OBJECT_ID),
             txb.pure.string(name),
             txb.pure.string(description),
+            txb.pure.string(organizerName),
+            txb.pure.address(account.address),
             txb.pure.u64(goalAmount),
-            txb.pure.u64(parseInt(duration, 10)),
-            txb.object('0x6'), // Clock object
+            txb.pure.u64(deadline.getTime())
         ],
       });
       console.log("Calling executeTransaction from createCampaign...");
@@ -106,7 +107,7 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
     const [splitCoin] = txb.splitCoins(txb.gas, [txb.pure.u64(parsedAmount)]);
 
     txb.moveCall({
-      target: `${PACKAGE_ID}::donation_system::donate`,
+      target: `${PACKAGE_ID}::donation::donate`,
       arguments: [
           txb.object(PROFILES_OBJECT_ID),
           txb.object(campaignId),
@@ -164,7 +165,7 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
     if (!account) return;
     const txb = new Transaction();
     txb.moveCall({
-      target: `${PACKAGE_ID}::donation_system::withdraw`,
+      target: `${PACKAGE_ID}::donation::withdraw`,
       arguments: [txb.object(PROFILES_OBJECT_ID), txb.object(campaignId)],
     });
     console.log("Calling executeTransaction from withdraw...");

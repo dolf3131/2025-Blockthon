@@ -30,7 +30,7 @@ const CampaignDetail = ({
     'queryEvents',
     {
       query: {
-        MoveEventType: `${PACKAGE_ID}::donation_system::Donated`,
+        MoveEventType: `${PACKAGE_ID}::donation::Donated`,
       },
       order: 'ascending',
     },

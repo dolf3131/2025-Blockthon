@@ -79,7 +79,7 @@ const Profile = ({ client, profilesId, setSelectedCampaign }) => {
         try {
             const tx = new Transaction();
             tx.moveCall({
-                target: `${PACKAGE_ID}::donation_system::get_user_nfts`,
+                target: `${PACKAGE_ID}::donation::get_user_nfts`,
                 arguments: [tx.object(profilesId), tx.pure.address(account.address)],
             });
 
@@ -142,7 +142,7 @@ const Profile = ({ client, profilesId, setSelectedCampaign }) => {
         try {
             const events = await client.queryEvents({
                 query: {
-                    MoveEventType: `${PACKAGE_ID}::donation_system::CampaignCreated`,
+                    MoveEventType: `${PACKAGE_ID}::donation::CampaignCreated`,
                 },
                 limit: 100, // Adjust limit as needed
             });

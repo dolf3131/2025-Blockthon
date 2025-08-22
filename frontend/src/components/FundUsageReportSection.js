@@ -17,7 +17,7 @@ const FundUsageReportSection = ({
     'queryEvents',
     {
       query: {
-        MoveEventType: `${PACKAGE_ID}::donation_system::FundUsageReported`,
+        MoveEventType: `${PACKAGE_ID}::donation::FundUsageReported`,
       },
       order: 'descending',
     },
@@ -32,7 +32,7 @@ const FundUsageReportSection = ({
 
     const txb = new Transaction();
     txb.moveCall({
-      target: `${PACKAGE_ID}::donation_system::submit_fund_usage_report`,
+      target: `${PACKAGE_ID}::donation::submit_fund_usage_report`,
       arguments: [
         txb.object(campaign.data.objectId),
         txb.pure.string(reportTitle),
