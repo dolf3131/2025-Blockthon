@@ -113,6 +113,7 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
 
     console.log("Calling executeTransaction from donate...");
     executeTransaction(txb, (txbResponse) => {
+      console.log("Full txbResponse:", JSON.stringify(txbResponse, null, 2));
       console.log("txbResponse.effects?.created:", txbResponse.effects?.created);
       const createdNft = txbResponse.effects?.created?.find(e => {
         return e.owner.AddressOwner?.trim().toLowerCase() === account.address.trim().toLowerCase();
