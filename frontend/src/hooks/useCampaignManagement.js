@@ -78,6 +78,7 @@ export const useCampaignManagement = (account, client, signAndExecute, refetchCa
             txb.pure.string(description),
             txb.pure.u64(goalAmount),
             txb.pure.u64(parseInt(duration, 10)),
+            txb.object('0x6'), // Clock object
         ],
       });
       console.log("Calling executeTransaction from createCampaign...");
