@@ -302,6 +302,7 @@ function App() {
                 createCampaign={createCampaign}
                 isLoading={isLoading}
                 isError={isError}
+                profilesId={profilesId}
               />} />
               <Route path="/profile" element={<Profile client={client} profilesId={profilesId} />} />
             </Routes>
