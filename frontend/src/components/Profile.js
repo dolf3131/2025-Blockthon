@@ -79,7 +79,7 @@ const Profile = ({ client, profilesId, setSelectedCampaign }) => {
         try {
             const tx = new Transaction();
             tx.moveCall({
-                target: `${PACKAGE_ID}::donation::get_user_nfts`,
+                target: `${PACKAGE_ID}::profile_helpers::get_user_nfts`,
                 arguments: [tx.object(profilesId), tx.pure.address(account.address)],
             });
 
